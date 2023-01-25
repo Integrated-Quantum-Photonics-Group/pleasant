@@ -13,9 +13,6 @@ At the moment, only one loader for one specific data saving scheme exists.
 However, if you write your own custom loader function for your data saving scheme,
 you can still make use of all data analysis features of this package.
 
-_We note that this package was only tested with data generated on a specific experimental setup.
-As stated in the license, we cannot guarantee that it will fulfill whatever requirements your research data might have._
-
 ## Attribution
 
 If you are publishing any work based on using pleasant as an analysis tool, please mention it e.g. in the methods section
@@ -26,7 +23,7 @@ and consider citing the original scientific work that this package was written f
 ## Features
 
 - independent and extendable data loading functions
-- convenient handling of measurement metadata with the dedicated `Measurement` class
+- convenient handling of measurement metadata with the dedicated [`Measurement`](src/pleasant/measurement.py) class
   - access to measurement metadata (scan speed, scan range, user-defined description, ...)
   - rebinning of data
   - simple photon-count threshold filtering
@@ -44,10 +41,10 @@ you can clone or download this repository to your local machine and install the 
 
 `pip install -e .`
 
-in the package directory. You might want to copy the `examples` directory to wherever you are going to work
+in the package directory. You might want to copy the [`examples`](examples/) directory to wherever you are going to work
 on your data analysis for easier access.
 
 ## Documentation
 
-The main resource for getting started is the demo notebook. It is located in the `examples` directory.
+The main resource for getting started is the [demo notebook](examples/demo.ipynb). It is located in the `examples` directory.
 In addition, most functions in the code are documented with docstrings.
