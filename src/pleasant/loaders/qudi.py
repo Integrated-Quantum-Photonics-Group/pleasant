@@ -80,6 +80,11 @@ def _get_scan_params(filename):
 def _read_wavemeter_file(filename):
     """
     Read wavemeter file and compute average values for start and stop frequencies.
+    The excitation frequency during all scans of the measurement is then assumed as linear
+    and equal for all scans. This approximation is only appropriate if during the course of a measurement:
+        - the drift of the laser from scan to scan is negligible
+        - any hysteresis or other deviation from a linear behavior is negligible
+        - the wavelength/frequency of the laser is read our precisely before and after each scan, not during a scan.
     :param filename: path to the qudi data file
     :return: average frequency before the scan, average frequency after the scan
     """

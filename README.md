@@ -13,6 +13,9 @@ At the moment, only one loader for one specific data saving scheme exists.
 However, if you write your own custom loader function for your data saving scheme,
 you can still make use of all data analysis features of this package.
 
+_We note that this package was only tested with data generated on a specific experimental setup.
+As stated in the license, we cannot guarantee that it will fulfill whatever requirements your research data might have._
+
 ## Attribution
 
 If you are publishing any work based on using pleasant as an analysis tool, please mention it e.g. in the methods section
@@ -22,16 +25,13 @@ and consider citing the original scientific work that this package was written f
 
 ## Features
 
-- loading of data from separate files containing
-  - wavelengths before and after each scan
-  - registered count rates during the scan
-- extendable to data saved in other schemes/formats
-- easy handling of measurement metadata with the dedicated `Measurement` class
-  - sensible treatment of excitation frequencies and registered count rates
+- independent and extendable data loading functions
+- convenient handling of measurement metadata with the dedicated `Measurement` class
   - access to measurement metadata (scan speed, scan range, user-defined description, ...)
   - rebinning of data
   - simple photon-count threshold filtering
-  - fitting and plotting a sum of all scans powered by [lmfit](https://lmfit.github.io/lmfit-py/) and [matplotlib](https://matplotlib.org)
+- typical PLE analysis routines, e.g. for the extraction of homogeneous and inhomogeneous linewidths
+  - fitting and plotting a sum of all PLE scans with [lmfit](https://lmfit.github.io/lmfit-py/) and [matplotlib](https://matplotlib.org)
   - fitting of individual PLE scans with a peak-like model (Gaussian, Lorentzian, Voigt, Pseudo-Voigt)
   - plotting of scans with or without fit
   - straight-forward export of scan fit results as a [pandas](https://pandas.pydata.org) dataframe retaining all measurement metadata
