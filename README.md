@@ -36,13 +36,18 @@ and consider citing the original scientific work that this package was written f
 
 ## Installation
 
-pleasant is provided as a pip-installable python package. While not yet on the package index,
-you can clone or download this repository to your local machine and install the package by running
+pleasant is provided as a pip-installable Python package. You can clone or download this repository to your
+local machine and install the package by running
 
 `pip install -e .`
 
-in the package directory. You might want to copy the [`examples`](examples/) directory to wherever you are going to work
-on your data analysis for easier access.
+in the package directory. Note that a recent version of `pip` is required for the installation. Try updating `pip`
+in case this step fails.
+
+To run the demo notebook or work in notebooks in general, you need to install
+[Jupyter Lab](https://jupyter.org/install) or the classic Jupyter Notebook if it is not already installed in your
+environment. You might want to copy the [`examples`](examples/) directory to wherever you are going to work
+on your data analysis for easier access and to leave the package directory clean.
 
 ## Documentation
 
