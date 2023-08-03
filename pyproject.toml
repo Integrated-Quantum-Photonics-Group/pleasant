@@ -18,6 +18,18 @@ lmfit = "^1.1.0"
 [tool.poetry.group.dev.dependencies]
 jupyterlab = "^3.5.0"
 pytest = "^7.2.0"
+coverage = {extras = ["toml"], version = "^7.2.7"}
+pytest-cov = "^4.1.0"
+
+[tool.coverage.paths]
+source = ["src", "*/site-packages"]
+
+[tool.coverage.run]
+branch = true
+source = ["pleasant"]
+
+[tool.coverage.report]
+show_missing = true
 
 [build-system]
 requires = ["poetry-core"]
