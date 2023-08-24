@@ -21,12 +21,13 @@ def inv_variance_weighting(a):
     return avg, std
 
 
-def get_spectral_diffusion_rates(_df):
+def get_spectral_diffusion_rates(_df, verbose=False):
     """
     Compute the time-normalized spectral jumps of the fitted resonance frequency from one scan to the next.
     They make up the single data points of what is referred here as the spectral diffusion rate.
     Can only be determined if two consecutive scans have a fit. Back- and forward scans (retrace and trace) are
     treated separately, i.e. the jump from one forward (backward) to the next forward (backward) scan is computed.
+    :param verbose: print statistics
     :param _df: data frame containing scan fit results in the format as retrieved from a Measurement object
     :return: two-column array of time-normalized spectral jumps (value and error)
     """
@@ -74,7 +75,8 @@ def get_spectral_diffusion_rates(_df):
 
     ratio_with = with_fit / tot
     ratio_cons = cons / tot
-    print(f'Total number of scans: {tot}')
-    print(f'Scans with fit:        {with_fit} ({ratio_with:.0%})')
-    print(f'Consecutive with fit:  {cons} ({ratio_cons:.0%})')
+    if verbose:
+        print(f'Total number of scans: {tot}')
+        print(f'Scans with fit:        {with_fit} ({ratio_with:.0%})')
+        print(f'Consecutive with fit:  {cons} ({ratio_cons:.0%})')
     return rates[~np.isnan(rates[:, 0])]

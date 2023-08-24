@@ -105,12 +105,13 @@ class Measurement:
         print(f'{self.timestamp} | {self.description} | {self.scan_direction:+} direction')
         print(f'Scan over {1e-9 * self.freq_range :.2f} GHz at {1e-9 * self.scan_speed:.2f} GHz/s')
 
-    def rebin_data(self, bins_to_merge=None, target_bin_width=None):
+    def rebin_data(self, bins_to_merge=None, target_bin_width=None, verbose=False):
         """
         Rebin the count rate matrix and the frequency vector to a lower resolution than the original,
         increasing the bin width. You can specify either a number of bins to merge or a target bin width.
         If necessary, bins at the high frequency end will be trimmed.
         All previously performed fits and masks will be deleted.
+        :param verbose: print information about rebinning process
         :param bins_to_merge: Number of bins to merge and average over. Factor that the bin count is reduced by.
         :param target_bin_width: Target bin width in Hz. A number of bins to merge will be calculated from this value.
         """
@@ -147,9 +148,10 @@ class Measurement:
         self.exc_freq = self.exc_freq.reshape(-1, bins_to_merge).mean(axis=1)
 
         # report on result
-        new_bin_width = self.bin_width
-        print((f'Rebinned from {1e-6*orig_bin_width:.1f} to {1e-6*new_bin_width:.1f} MHz/bin,'
-               f' trimming {remainder} bin(s).'))
+        if verbose:
+            new_bin_width = self.bin_width
+            print((f'Rebinned from {1e-6*orig_bin_width:.1f} to {1e-6*new_bin_width:.1f} MHz/bin,'
+                   f' trimming {remainder} bin(s).'))
 
     def plot_sum_of_scans(self, x_lim=None):
         """
