@@ -254,6 +254,33 @@ class Measurement:
         self.photon_count_mask = (absolute_photon_count >= threshold).any(axis=1)
         return self.photon_count_mask
 
+    def peak_window_filter(self, min_snr=3, window=10):
+        """
+        Creates a mask by averaging the count rate in a window around the global maximum and comparing it to the
+        overall average count rate.
+        :param min_snr: threshold value for how many times the count rate in the peak window should exceed the average
+        :param window: size of the window around the peak in number of samples
+        :return: mask array
+        """
+        # reset potentially existing fit results
+        self.scan_fit_results = [None for _ in range(self.scan_count)]
+        self.scan_fit_model = None
+
+        half_window = window // 2
+        mask = []
+        for y in self.count_rate:
+            # compute noise floor
+            th_sum = window * min_snr * y.mean()
+
+            i_max = y.argmax()
+            i_start = i_max - half_window
+            i_stop = i_max + half_window
+            window_sum = y[i_start:i_stop].sum()
+            mask.append(window_sum > th_sum)
+
+        self.photon_count_mask = np.array(mask)
+        return self.photon_count_mask
+
     def fit_scans(self, model_name='Lorentzian', fwhm_guess=50e6):
         """
         Fit all scans with a peak-like model.
