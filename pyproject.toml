@@ -20,6 +20,7 @@ jupyterlab = "^3.5.0"
 pytest = "^7.2.0"
 coverage = {extras = ["toml"], version = "^7.2.7"}
 pytest-cov = "^4.1.0"
+pytest-datadir = "^1.4.1"
 
 [tool.coverage.paths]
 source = ["src", "*/site-packages"]
