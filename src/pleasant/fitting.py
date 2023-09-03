@@ -27,7 +27,7 @@ def gauss_amplitude(height, sigma):
     return height * sigma * np.sqrt(2 * np.pi)
 
 def gauss_height(amplitude, sigma):
-    return amplitude / sigma * np.sqrt(2 * np.pi)
+    return amplitude / (sigma * np.sqrt(2 * np.pi))
 
 def lorentz_amplitude(height, sigma):
     return height * np.pi * sigma
