@@ -81,9 +81,9 @@ class Measurement:
             return self._scan_direction
         else:
             d = np.diff(self.exc_freq)
-            if np.all(d > 1):
+            if np.all(d > 0):
                 self._scan_direction = 1
-            elif np.all(d < 1):
+            elif np.all(d < 0):
                 self._scan_direction = -1
             else:
                 raise AssertionError('exc_freq should be monotonically in- or decreasing')
