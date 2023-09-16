@@ -7,7 +7,8 @@ from pleasant import fitting
 
 
 class Measurement:
-    def __init__(self, count_rate, exc_freq, timestamp=None, description=None, scan_duration=None, break_duration=None):
+    def __init__(self, count_rate, exc_freq, timestamp=None, description=None,
+                 scan_duration=np.nan, break_duration=np.nan):
         """
         A Measurement represents a sequence of subsequent resonant absorption scans.
         The scanned excitation frequencies are assumed to be the same for each scan.
@@ -21,22 +22,22 @@ class Measurement:
         :param break_duration: time between individual scans (not accounting for potential backwards scan)
         """
         # make sure count_rate and exc_freq are arrays with the correct dimension
-        # if count_rate is a 1D array (only one scan was performed for this measurement), convert to 2D
-        if count_rate.ndim == 1:
-            count_rate = count_rate.reshape(1, count_rate.size)
         try:
-            if count_rate.ndim != 2:
-                # it should be 2D by now
-                raise AssertionError('count_rate should be a 1D or 2D numpy array')
+            dim = count_rate.ndim
         except AttributeError:
+            raise AssertionError('count_rate should be a numpy array')
+        # if count_rate is a 1D array (only one scan was performed for this measurement), convert to 2D
+        if dim == 1:
+            count_rate = count_rate.reshape(1, count_rate.size)
+        if count_rate.ndim != 2:
+            # it should be 2D by now
             raise AssertionError('count_rate should be a 1D or 2D numpy array')
 
         try:
             if exc_freq.ndim != 1:
                 raise AssertionError('exc_freq should be a 1D numpy array')
-
         except AttributeError:
-            raise AssertionError('exc_freq should be a 1D numpy array')
+            raise AssertionError('exc_freq should be a numpy array')
 
         if count_rate.shape[1] != exc_freq.size:
             raise AssertionError('count_rate and exc_freq should have the same bin count')
@@ -216,6 +217,9 @@ class Measurement:
         Save the result internally to self.sum_fit_result
         :return:
         """
+        if np.isnan(self.scan_speed):
+            raise AssertionError('Attribute "scan_duration" must not be NaN.')
+
         time_per_bin = self.bin_width / self.scan_speed
         counts = self.count_rate * time_per_bin
         sum_of_scans = counts.sum(axis=0)
@@ -242,6 +246,9 @@ class Measurement:
         :param threshold: minimum counts in a bin to pass the filter
         :return: mask array
         """
+        if np.isnan(self.scan_duration):
+            raise AssertionError('Attribute "scan_duration" must not be NaN.')
+
         # reset potentially existing fit results
         self.scan_fit_results = [None for _ in range(self.scan_count)]
         self.scan_fit_model = None
