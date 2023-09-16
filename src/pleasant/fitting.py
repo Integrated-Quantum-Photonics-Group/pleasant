@@ -1,5 +1,6 @@
-import numpy as np
 import lmfit
+import numpy as np
+
 
 # define models with constant background
 gaussian = lmfit.models.GaussianModel() + lmfit.models.ConstantModel()

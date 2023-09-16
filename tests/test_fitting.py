@@ -1,6 +1,7 @@
-import pytest
-import numpy as np
 from lmfit.models import GaussianModel, LorentzianModel, VoigtModel
+import numpy as np
+import pytest
+
 from pleasant import fitting
 
 

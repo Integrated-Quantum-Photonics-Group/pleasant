@@ -1,7 +1,7 @@
-import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+import numpy as np
+import pandas as pd
 
 from pleasant import fitting
 

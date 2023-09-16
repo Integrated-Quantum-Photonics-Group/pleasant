@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from pleasant.util import inv_variance_weighting, get_spectral_diffusion_rates
+from pleasant.util import get_spectral_diffusion_rates, inv_variance_weighting
 
 
 def test_inv_variance_weighting():
