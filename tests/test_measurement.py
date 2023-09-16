@@ -105,9 +105,15 @@ def test_rebin_data_target_bin_width(zero_measurement):
 ### Tests with real data
 
 def test_fit_sum_of_scans(measurement_with_data):
-    measurement_with_data.fit_sum_of_scans()
-    fwhm = measurement_with_data.sum_fit_result.params['fwhm'].value
+    res = measurement_with_data.fit_sum_of_scans()
+    measurement_with_data.plot_sum_of_scans()
+    fwhm = res.params['fwhm'].value
     assert round(1e-9 * fwhm, 2) == 4.35
+
+def test_fit_sum_of_scans_range(measurement_with_data):
+    res = measurement_with_data.fit_sum_of_scans(scan_index_range=(0, 100))
+    fwhm = res.params['fwhm'].value
+    assert round(1e-9 * fwhm, 2) == 5.05
 
 def test_plot_sum_of_scans(measurement_with_data):
     fig = measurement_with_data.plot_sum_of_scans()

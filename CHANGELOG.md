@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A `nox` file for test automation.
 - Improved documentation in README and example notebook.
 - More advanced filter `peak_window_filter`.
+- Argument `scan_index_range` to `fit_sum_of_scans` and `plot_sum_of_scans`.
 
 ### Changed
 
@@ -21,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Use `NaN` as default for `scan_duration` and `break_duration`.
 - Assert that `scan_duration` is not `NaN` where required.
 - Improve type checking in `Measurement.__init__`.
+- `fit_sum_of_scans` now returns the fit result instead of saving it in an attribute.
 
 ### Fixed
 
@@ -28,6 +30,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Minor bug in `scan_direction` property.
 
 ### Removed
+
+- Attribute `sum_fit_result` of `Measurement`.
 
 ## [1.0.0] - 2023-01-24
 

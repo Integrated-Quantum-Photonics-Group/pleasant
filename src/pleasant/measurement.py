@@ -54,7 +54,6 @@ class Measurement:
         self.scan_duration = scan_duration
         self.break_duration = break_duration
 
-        self.sum_fit_result = None
         self.scan_fit_results = [None for _ in range(self.scan_count)]
         self.scan_fit_model = None
         self.photon_count_mask = np.full(self.scan_count, True)
@@ -126,7 +125,6 @@ class Measurement:
         self.exc_freq = self._orig_exc_freq
 
         # reset potentially existing fit results and mask
-        self.sum_fit_result = None
         self.scan_fit_results = [None for _ in range(self.scan_count)]
         self.scan_fit_model = None
         self.photon_count_mask = np.full(self.scan_count, True)
@@ -154,25 +152,25 @@ class Measurement:
             print((f'Rebinned from {1e-6*orig_bin_width:.1f} to {1e-6*new_bin_width:.1f} MHz/bin,'
                    f' trimming {remainder} bin(s).'))
 
-    def plot_sum_of_scans(self, x_lim=None):
+    def plot_sum_of_scans(self, x_lim=None, scan_index_range=None):
         """
         Plot the count rates as a 2D image, sum up the counts of all scans and fit them with a Gaussian function.
         :param x_lim: limits for the x-axis
+        :param scan_index_range: scans to sum up and display
         :return: matplotlib figure object
         """
         if self.scan_count < 2:
             raise AssertionError('Measurement must contain at least two scans.')
 
-        if self.sum_fit_result is None:
-            self.fit_sum_of_scans()
+        sum_fit_result = self.fit_sum_of_scans(scan_index_range=scan_index_range)
 
         fig, (ax, ax2) = plt.subplots(2, sharex=True, constrained_layout=True)
 
         # top plot: inhomogeneous line width (sum of scans)
-        ax.plot(1e-9 * self.exc_freq, self.sum_fit_result.data, label='Data')
-        ax.plot(1e-9 * self.exc_freq, self.sum_fit_result.best_fit, label='Gaussian Fit')
+        ax.plot(1e-9 * self.exc_freq, sum_fit_result.data, label='Data')
+        ax.plot(1e-9 * self.exc_freq, sum_fit_result.best_fit, label='Gaussian Fit')
 
-        fwhm_ghz = 1e-9 * self.sum_fit_result.params['fwhm'].value
+        fwhm_ghz = 1e-9 * sum_fit_result.params['fwhm'].value
         if fwhm_ghz < 1.0:
             label = '$w$ = {:.0f} MHz'.format(1e3 * fwhm_ghz)
         else:
@@ -183,8 +181,13 @@ class Measurement:
         ax.set_ylabel('Counts per Bin')
 
         # bottom plot: evolution of spectral position
-        scan_index = np.arange(self.scan_count)
-        cf = ax2.contourf(1e-9 * self.exc_freq, scan_index, 1e-3 * self.count_rate)
+        if scan_index_range is None:
+            count_rate = self.count_rate
+            scan_index = np.arange(self.scan_count)
+        else:
+            count_rate = self.count_rate[scan_index_range[0]:scan_index_range[1], :]
+            scan_index = np.arange(scan_index_range[0], scan_index_range[1])
+        cf = ax2.contourf(1e-9 * self.exc_freq, scan_index, 1e-3 * count_rate)
 
         # colorbar
         # first plot has no colorbar, create spacer
@@ -211,10 +214,10 @@ class Measurement:
 
         return fig
 
-    def fit_sum_of_scans(self):
+    def fit_sum_of_scans(self, scan_index_range=None):
         """
-        Sum up the counts of all scans and fit them with a Gaussian function.
-        Save the result internally to self.sum_fit_result
+        Sum up the counts of all scans or a selected range and fit them with a Gaussian function.
+        :param scan_index_range: scans to sum up
         :return:
         """
         if np.isnan(self.scan_speed):
@@ -222,7 +225,10 @@ class Measurement:
 
         time_per_bin = self.bin_width / self.scan_speed
         counts = self.count_rate * time_per_bin
-        sum_of_scans = counts.sum(axis=0)
+        if scan_index_range is None:
+            sum_of_scans = counts.sum(axis=0)
+        else:
+            sum_of_scans = counts[scan_index_range[0]:scan_index_range[1], :].sum(axis=0)
 
         model = fitting.gaussian
         params = model.make_params()
@@ -235,7 +241,7 @@ class Measurement:
         params['sigma'].set(value=sigma_guess, max=sigma_max)
         params['center'].set(value=center_guess)
 
-        self.sum_fit_result = model.fit(sum_of_scans, x=self.exc_freq, params=params)
+        return model.fit(sum_of_scans, x=self.exc_freq, params=params)
 
     def photon_count_filter(self, threshold):
         """
