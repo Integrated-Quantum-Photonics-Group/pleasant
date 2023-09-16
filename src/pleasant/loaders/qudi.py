@@ -24,11 +24,15 @@ def load_qudi_folder(folder_name, description_contains="", break_duration=None):
     """
     Load all qudi data files contained in a folder into handy Measurement class objects.
     There are four files per measurement pair:
-        - a _volt_data_raw_trace.dat file containing a 2D matrix of the count rates registered during all scans
-        - a _wl_data_trace.dat file containing the wavemeter readings before and after each scan
-        - retrace versions of the above containing the same data but for scans in the opposite spectral direction
+        - a _volt_data_raw_trace.dat file containing a 2D matrix of the count rates
+        registered during all scans
+        - a _wl_data_trace.dat file containing the wavemeter readings before
+        and after each scan
+        - retrace versions of the above containing the same data but for scans
+        in the opposite spectral direction
     :param folder_name: directory where the data files are located
-    :param description_contains: filenames that do not contain this string in the description part will be ignored
+    :param description_contains: filenames that do not contain this string
+    in the description part will be ignored
     :param break_duration: argument to be passed on to the Measurement object creator
     :return: list of Measurement objects
     """
@@ -66,7 +70,8 @@ def load_qudi_folder(folder_name, description_contains="", break_duration=None):
 
 def _get_filename_stubs(folder_name):
     """
-    Generate a set of filename stubs that uniquely identify the measurement pairs (trace and retrace)
+    Generate a set of filename stubs that uniquely identify the measurement pairs
+    (trace and retrace)
     :param folder_name: directory where the data files are located
     :return: list of filename stubs
     """
@@ -96,11 +101,13 @@ def _get_scan_params(filename):
 def _read_wavemeter_file(filename):
     """
     Read wavemeter file and compute average values for start and stop frequencies.
-    The excitation frequency during all scans of the measurement is then assumed as linear
-    and equal for all scans. This approximation is only appropriate if during the course of a measurement:
+    The excitation frequency during all scans of the measurement is then assumed as
+    linear and equal for all scans.
+    This approximation is only appropriate if during the course of a measurement:
         - the drift of the laser from scan to scan is negligible
         - any hysteresis or other deviation from a linear behavior is negligible
-        - the wavelength/frequency of the laser is read our precisely before and after each scan, not during a scan.
+        - the wavelength/frequency of the laser is read our precisely before and
+        after each scan, not during a scan.
     :param filename: path to the qudi data file
     :return: average frequency before the scan, average frequency after the scan
     """

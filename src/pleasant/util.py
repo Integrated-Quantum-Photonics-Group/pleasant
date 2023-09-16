@@ -6,7 +6,8 @@ __all__ = ["inv_variance_weighting", "get_spectral_diffusion_rates"]
 def inv_variance_weighting(a):
     """
     Calculate inverse variance weighted average and standard deviation.
-    :param a: two-column array containing values in the first and errors in the second column
+    :param a: two-column array containing values in the first and errors
+    in the second column
     :return: average value, standard deviation
     """
     # filter out pairs where either value or error is nan
@@ -23,12 +24,16 @@ def inv_variance_weighting(a):
 
 def get_spectral_diffusion_rates(_df, verbose=False):
     """
-    Compute the time-normalized spectral jumps of the fitted resonance frequency from one scan to the next.
-    They make up the single data points of what is referred here as the spectral diffusion rate.
-    Can only be determined if two consecutive scans have a fit. Back- and forward scans (retrace and trace) are
-    treated separately, i.e. the jump from one forward (backward) to the next forward (backward) scan is computed.
+    Compute the time-normalized spectral jumps of the fitted resonance frequency
+    from one scan to the next. They make up the single data points of what is referred
+    here as the spectral diffusion rate.
+    Can only be determined if two consecutive scans have a fit.
+    Back- and forward scans (retrace and trace) are treated separately, i.e.
+    the jump from one forward (backward) to the next forward (backward)
+    scan is computed.
     :param verbose: print statistics
-    :param _df: data frame containing scan fit results in the format as retrieved from a Measurement object
+    :param _df: data frame containing scan fit results in the format as retrieved
+    from a Measurement object
     :return: two-column array of time-normalized spectral jumps (value and error)
     """
     rates = np.empty((0, 2))
@@ -50,7 +55,8 @@ def get_spectral_diffusion_rates(_df, verbose=False):
             center = _df_sel["center"].to_numpy()
             err = _df_sel["center_stderr"].to_numpy()
 
-            # determine jump_time: time between subsequent resonance acquisitions (in one direction, hence the factor 2)
+            # determine jump_time: time between subsequent resonance acquisitions
+            # (in one direction, hence the factor 2)
             first_scan = _df_sel.iloc[0]
             scan_duration = first_scan["scan_range"] / first_scan["scan_speed"]
             jump_time = 2 * (scan_duration + first_scan["break_duration"])

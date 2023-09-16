@@ -19,21 +19,26 @@ class Measurement:
         """
         A Measurement represents a sequence of subsequent resonant absorption scans.
         The scanned excitation frequencies are assumed to be the same for each scan.
-        Scans in different directions (sometimes referred to as trace and retrace) are supposed to be treated
-        as individual measurements. Single scans are also supported.
-        :param count_rate: 1D (only one scan) or 2D (multiple scans) numpy array containing the measured count rates
+        Scans in different directions (sometimes referred to as trace and retrace) are
+        supposed to be treated as individual measurements.
+        Single scans are also supported.
+        :param count_rate: 1D (only one scan) or 2D (multiple scans) numpy array
+        containing the measured count rates
         :param exc_freq: 1D numpy array of the scanned excitation frequencies (in Hz)
         :param timestamp: string specifying when the measurement was taken
-        :param description: details about the measurement, e.g. excitation power or source identifier
+        :param description: details about the measurement, e.g. excitation power or
+        source identifier
         :param scan_duration: time taken for an individual scan (in s)
-        :param break_duration: time between individual scans (not accounting for potential backwards scan)
+        :param break_duration: time between individual scans
+        (not accounting for potential backwards scan)
         """
         # make sure count_rate and exc_freq are arrays with the correct dimension
         try:
             dim = count_rate.ndim
         except AttributeError as e:
             raise AssertionError("count_rate should be a numpy array") from e
-        # if count_rate is a 1D array (only one scan was performed for this measurement), convert to 2D
+        # if count_rate is a 1D array
+        # (only one scan was performed for this measurement), convert to 2D
         if dim == 1:
             count_rate = count_rate.reshape(1, count_rate.size)
         if count_rate.ndim != 2:
@@ -123,13 +128,16 @@ class Measurement:
 
     def rebin_data(self, bins_to_merge=None, target_bin_width=None, verbose=False):
         """
-        Rebin the count rate matrix and the frequency vector to a lower resolution than the original,
-        increasing the bin width. You can specify either a number of bins to merge or a target bin width.
+        Rebin the count rate matrix and the frequency vector to a lower resolution than
+        the original, increasing the bin width. You can specify either a number of bins
+        to merge or a target bin width.
         If necessary, bins at the high frequency end will be trimmed.
         All previously performed fits and masks will be deleted.
         :param verbose: print information about rebinning process
-        :param bins_to_merge: Number of bins to merge and average over. Factor that the bin count is reduced by.
-        :param target_bin_width: Target bin width in Hz. A number of bins to merge will be calculated from this value.
+        :param bins_to_merge: Number of bins to merge and average over.
+        Factor that the bin count is reduced by.
+        :param target_bin_width: Target bin width in Hz.
+        A number of bins to merge will be calculated from this value.
         """
         if not (bins_to_merge or target_bin_width):
             raise AssertionError("Either size or bin_width must be specified.")
@@ -153,13 +161,15 @@ class Measurement:
         if target_bin_width:
             bins_to_merge = max(1, round(target_bin_width / orig_bin_width))
 
-        # trim some bins such that the original bin count can be divided by bins_to_merge
+        # trim some bins such that the original bin count
+        # can be divided by bins_to_merge
         remainder = self.count_rate.shape[1] % bins_to_merge
         if remainder != 0:
             self.count_rate = self.count_rate[:, :-remainder]
             self.exc_freq = self.exc_freq[:-remainder]
 
-        # do the actual rebinning: since we are working with rates, taking the mean is appropriate
+        # do the actual rebinning: since we are working with rates,
+        # taking the mean is appropriate
         new_bin_count = self.count_rate.shape[1] // bins_to_merge
         self.count_rate = self.count_rate.reshape(
             self.count_rate.shape[0], new_bin_count, bins_to_merge
@@ -179,7 +189,8 @@ class Measurement:
 
     def plot_sum_of_scans(self, x_lim=None, scan_index_range=None):
         """
-        Plot the count rates as a 2D image, sum up the counts of all scans and fit them with a Gaussian function.
+        Plot the count rates as a 2D image, sum up the counts of all scans
+        and fit them with a Gaussian function.
         :param x_lim: limits for the x-axis
         :param scan_index_range: scans to sum up and display
         :return: matplotlib figure object
@@ -241,7 +252,8 @@ class Measurement:
 
     def fit_sum_of_scans(self, scan_index_range=None):
         """
-        Sum up the counts of all scans or a selected range and fit them with a Gaussian function.
+        Sum up the counts of all scans or a selected range
+        and fit them with a Gaussian function.
         :param scan_index_range: scans to sum up
         :return:
         """
@@ -274,8 +286,8 @@ class Measurement:
         """
         Creates a mask depending on a very simple photon count filtering condition.
         The mask is used when scans are fitted later.
-        If a scan contains a single bin in which at least as many counts were registered as the threshold,
-        it passes the filter.
+        If a scan contains a single bin in which at least as many counts were
+        registered as the threshold, it passes the filter.
         :param threshold: minimum counts in a bin to pass the filter
         :return: mask array
         """
@@ -290,15 +302,17 @@ class Measurement:
         bin_time = self.scan_duration / self.bin_count
         absolute_photon_count = (self.count_rate * bin_time).round(0).astype(int)
 
-        # select scans that contain at least one bin with at least as many photons as the threshold
+        # select scans that contain at least one bin with at least
+        # as many photons as the threshold
         self.photon_count_mask = (absolute_photon_count >= threshold).any(axis=1)
         return self.photon_count_mask
 
     def peak_window_filter(self, min_snr=3, window=10):
         """
-        Creates a mask by averaging the count rate in a window around the global maximum and comparing it to the
-        overall average count rate.
-        :param min_snr: threshold value for how many times the count rate in the peak window should exceed the average
+        Creates a mask by averaging the count rate in a window around the global maximum
+        and comparing it to the overall average count rate.
+        :param min_snr: threshold value for how many times the count rate in the peak
+        window should exceed the average
         :param window: size of the window around the peak in number of samples
         :return: mask array
         """
@@ -324,7 +338,8 @@ class Measurement:
     def fit_scans(self, model_name="Lorentzian", fwhm_guess=50e6):
         """
         Fit all scans with a peak-like model.
-        :param model_name: name of the model to use for fitting, can be Lorentzian, Gaussian, Pseudo Voigt and Voigt.
+        :param model_name: name of the model to use for fitting,
+        can be Lorentzian, Gaussian, Pseudo Voigt and Voigt.
         :param fwhm_guess: initial value to use for the FWHM
         :return:
         """
@@ -389,8 +404,10 @@ class Measurement:
         """
         Plot an individual scan. The fit is included if it was performed before.
         :param i: Scan index to plot.
-        :param freq_range: If specified, trim the plot to this range (in Hz) around the fitted center frequency.
-        :param fit_eval_density: factor to increase fit smoothness by evaluation at more data points
+        :param freq_range: If specified, trim the plot to this range (in Hz) around
+        the fitted center frequency.
+        :param fit_eval_density: factor to increase fit smoothness by evaluation
+        at more data points
         :return: matplotlib figure object
         """
 
