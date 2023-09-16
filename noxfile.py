@@ -5,7 +5,7 @@ from nox_poetry import session
 nox.options.sessions = "lint", "tests"
 
 
-@session(python=["3.11", "3.10", "3.9"])
+@session(python=["3.11", "3.10"])
 def tests(session):
     session.install("pytest", "pytest-cov", "pytest-datadir", ".")
     session.run("pytest", "--cov")
