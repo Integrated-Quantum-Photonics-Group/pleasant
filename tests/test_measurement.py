@@ -1,5 +1,6 @@
 import pytest
 import numpy as np
+import pandas as pd
 from pleasant.measurement import Measurement
 
 @pytest.fixture
@@ -9,10 +10,19 @@ def zero_measurement():
     return Measurement(count_rate, exc_freq)
 
 @pytest.fixture
-def zero_measurement_kwargs():
-    count_rate = np.zeros((10, 100))
-    exc_freq = np.arange(100)
-    return Measurement(count_rate, exc_freq, scan_duration=1.0)
+def measurement_with_data(datadir):
+    count_rate = np.load(str(datadir)+'/count_rate.npy')
+    exc_freq = np.load(str(datadir)+'/exc_freq.npy')
+    scan_duration = 1.5
+    return Measurement(count_rate, exc_freq, scan_duration=scan_duration)
+
+@pytest.fixture
+def measurement_with_fits(measurement_with_data):
+    measurement_with_data.peak_window_filter()
+    # fit only 10 lines
+    measurement_with_data.photon_count_mask[10:] = False
+    measurement_with_data.fit_scans()
+    return measurement_with_data
 
 ### Measurement instantiation
 
@@ -64,8 +74,9 @@ def test_scan_direction_monotonically():
     with pytest.raises(AssertionError):
         _ = measurement.scan_direction
 
-def test_scan_speed(zero_measurement_kwargs):
-    assert zero_measurement_kwargs.scan_speed == 99.0
+def test_scan_speed(zero_measurement):
+    zero_measurement.scan_duration = 1
+    assert zero_measurement.scan_speed == 99.0
 
 def test_scan_speed_nan(zero_measurement):
     assert np.isnan(zero_measurement.scan_speed)
@@ -90,3 +101,62 @@ def test_rebin_data_bins_to_merge_remainder(zero_measurement, capsys):
 def test_rebin_data_target_bin_width(zero_measurement):
     zero_measurement.rebin_data(target_bin_width=2)
     assert zero_measurement.bin_count == 50
+
+### Tests with real data
+
+def test_fit_sum_of_scans(measurement_with_data):
+    measurement_with_data.fit_sum_of_scans()
+    fwhm = measurement_with_data.sum_fit_result.params['fwhm'].value
+    assert round(1e-9 * fwhm, 2) == 4.35
+
+def test_plot_sum_of_scans(measurement_with_data):
+    fig = measurement_with_data.plot_sum_of_scans()
+    # TODO this can be more precise
+    assert len(fig.axes) == 4
+
+def test_photon_count_filter(measurement_with_data):
+    mask = measurement_with_data.photon_count_filter(10)
+    assert mask.sum() == 237
+
+def test_peak_window_filter(measurement_with_data):
+    mask = measurement_with_data.peak_window_filter(min_snr=3, window=10)
+    assert mask.sum() == 336
+
+def test_fit_scans(measurement_with_fits):
+    n_mask = measurement_with_fits.photon_count_mask.sum()
+    n_fit_result = 0
+    for i in measurement_with_fits.scan_fit_results:
+        if i is not None:
+            n_fit_result += 1
+    assert n_fit_result == n_mask
+
+    fwhm = measurement_with_fits.scan_fit_results[0].params['fwhm'].value
+    assert round(fwhm, 3) == 0.043
+
+def test_fit_scans_gaussian(measurement_with_fits):
+    measurement_with_fits.fit_scans(model_name='Gaussian')
+    fwhm = measurement_with_fits.scan_fit_results[0].params['fwhm'].value
+    assert round(fwhm, 3) == 0.071
+
+def test_fit_scans_voigt(measurement_with_fits):
+    measurement_with_fits.fit_scans(model_name='Voigt')
+    fwhm = measurement_with_fits.scan_fit_results[0].params['fwhm'].value
+    assert round(fwhm, 3) == 0.071
+
+def test_fit_scans_pseudo_voigt(measurement_with_fits):
+    measurement_with_fits.fit_scans(model_name='Pseudo Voigt')
+    fwhm = measurement_with_fits.scan_fit_results[0].params['fwhm'].value
+    assert round(fwhm, 3) == 0.071
+
+def test_plot_individual_scan(measurement_with_fits):
+    print(measurement_with_fits.scan_fit_results)
+    fig = measurement_with_fits.plot_individual_scan(0)
+    assert len(fig.axes[0].lines) == 4
+
+def test_plot_individual_scan_no_fit(measurement_with_fits):
+    fig = measurement_with_fits.plot_individual_scan(15)
+    assert len(fig.axes[0].lines) == 1
+
+def test_scan_fit_data(measurement_with_fits):
+    df = measurement_with_fits.scan_fit_data
+    assert isinstance(df, pd.DataFrame)
