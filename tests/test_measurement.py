@@ -159,4 +159,5 @@ def test_plot_individual_scan_no_fit(measurement_with_fits):
 
 def test_scan_fit_data(measurement_with_fits):
     df = measurement_with_fits.scan_fit_data
+    # TODO: compare against complete data frame?
     assert isinstance(df, pd.DataFrame)
