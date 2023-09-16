@@ -82,6 +82,11 @@ def test_rebin_data_bins_to_merge(zero_measurement):
     zero_measurement.rebin_data(bins_to_merge=2)
     assert zero_measurement.bin_count == 50
 
+def test_rebin_data_bins_to_merge_remainder(zero_measurement, capsys):
+    zero_measurement.rebin_data(bins_to_merge=3, verbose=True)
+    captured = capsys.readouterr()
+    assert 'trimming 1 bin(s)' in captured.out
+
 def test_rebin_data_target_bin_width(zero_measurement):
     zero_measurement.rebin_data(target_bin_width=2)
     assert zero_measurement.bin_count == 50
