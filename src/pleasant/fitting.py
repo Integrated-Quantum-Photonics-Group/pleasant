@@ -11,32 +11,42 @@ voigt = lmfit.models.VoigtModel() + lmfit.models.ConstantModel()
 def gauss_sigma(fwhm):
     return fwhm / (2 * np.sqrt(2 * np.log(2)))
 
+
 def lorentz_sigma(fwhm):
     return fwhm / 2
+
 
 def voigt_sigma(fwhm):
     return fwhm / 3.6013  # approximate
 
+
 def gauss_fwhm(sigma):
     return sigma * (2 * np.sqrt(2 * np.log(2)))
+
 
 def lorentz_fwhm(sigma):
     return sigma * 2
 
+
 def gauss_amplitude(height, sigma):
     return height * sigma * np.sqrt(2 * np.pi)
+
 
 def gauss_height(amplitude, sigma):
     return amplitude / (sigma * np.sqrt(2 * np.pi))
 
+
 def lorentz_amplitude(height, sigma):
     return height * np.pi * sigma
+
 
 def lorentz_height(amplitude, sigma):
     return amplitude / (np.pi * sigma)
 
+
 def voigt_amplitude(height, sigma):
     return gauss_amplitude(height, sigma)
+
 
 def voigt_height(amplitude, sigma):
     return gauss_height(amplitude, sigma)

@@ -7,8 +7,15 @@ from pleasant import fitting
 
 
 class Measurement:
-    def __init__(self, count_rate, exc_freq, timestamp=None, description=None,
-                 scan_duration=np.nan, break_duration=np.nan):
+    def __init__(
+        self,
+        count_rate,
+        exc_freq,
+        timestamp=None,
+        description=None,
+        scan_duration=np.nan,
+        break_duration=np.nan,
+    ):
         """
         A Measurement represents a sequence of subsequent resonant absorption scans.
         The scanned excitation frequencies are assumed to be the same for each scan.
@@ -25,22 +32,24 @@ class Measurement:
         try:
             dim = count_rate.ndim
         except AttributeError:
-            raise AssertionError('count_rate should be a numpy array')
+            raise AssertionError("count_rate should be a numpy array")
         # if count_rate is a 1D array (only one scan was performed for this measurement), convert to 2D
         if dim == 1:
             count_rate = count_rate.reshape(1, count_rate.size)
         if count_rate.ndim != 2:
             # it should be 2D by now
-            raise AssertionError('count_rate should be a 1D or 2D numpy array')
+            raise AssertionError("count_rate should be a 1D or 2D numpy array")
 
         try:
             if exc_freq.ndim != 1:
-                raise AssertionError('exc_freq should be a 1D numpy array')
+                raise AssertionError("exc_freq should be a 1D numpy array")
         except AttributeError:
-            raise AssertionError('exc_freq should be a numpy array')
+            raise AssertionError("exc_freq should be a numpy array")
 
         if count_rate.shape[1] != exc_freq.size:
-            raise AssertionError('count_rate and exc_freq should have the same bin count')
+            raise AssertionError(
+                "count_rate and exc_freq should have the same bin count"
+            )
 
         # if all checks are passed, assign them to object attributes
         self._orig_count_rate = count_rate
@@ -86,7 +95,9 @@ class Measurement:
             elif np.all(d < 0):
                 self._scan_direction = -1
             else:
-                raise AssertionError('exc_freq should be monotonically in- or decreasing')
+                raise AssertionError(
+                    "exc_freq should be monotonically in- or decreasing"
+                )
             return self._scan_direction
 
     @property
@@ -101,9 +112,14 @@ class Measurement:
 
     def print_info(self):
         """Print information on this measurement."""
-        print('Measurement')
-        print(f'{self.timestamp} | {self.description} | {self.scan_direction:+} direction')
-        print(f'Scan over {1e-9 * self.freq_range :.2f} GHz at {1e-9 * self.scan_speed:.2f} GHz/s')
+        print("Measurement")
+        print(
+            f"{self.timestamp} | {self.description} | {self.scan_direction:+} direction"
+        )
+        print(
+            f"Scan over {1e-9 * self.freq_range :.2f} GHz at "
+            f"{1e-9 * self.scan_speed:.2f} GHz/s"
+        )
 
     def rebin_data(self, bins_to_merge=None, target_bin_width=None, verbose=False):
         """
@@ -116,9 +132,11 @@ class Measurement:
         :param target_bin_width: Target bin width in Hz. A number of bins to merge will be calculated from this value.
         """
         if not (bins_to_merge or target_bin_width):
-            raise AssertionError('Either size or bin_width must be specified.')
+            raise AssertionError("Either size or bin_width must be specified.")
         elif bins_to_merge and target_bin_width:
-            raise AssertionError('Either size or bin_width must be specified, not both.')
+            raise AssertionError(
+                "Either size or bin_width must be specified, not both."
+            )
 
         # reset frequency and count_rate matrix to original binning
         self.count_rate = self._orig_count_rate
@@ -143,14 +161,21 @@ class Measurement:
 
         # do the actual rebinning: since we are working with rates, taking the mean is appropriate
         new_bin_count = self.count_rate.shape[1] // bins_to_merge
-        self.count_rate = self.count_rate.reshape(self.count_rate.shape[0], new_bin_count, bins_to_merge).mean(axis=2)
+        self.count_rate = self.count_rate.reshape(
+            self.count_rate.shape[0], new_bin_count, bins_to_merge
+        ).mean(axis=2)
         self.exc_freq = self.exc_freq.reshape(-1, bins_to_merge).mean(axis=1)
 
         # report on result
         if verbose:
             new_bin_width = self.bin_width
-            print((f'Rebinned from {1e-6*orig_bin_width:.1f} to {1e-6*new_bin_width:.1f} MHz/bin,'
-                   f' trimming {remainder} bin(s).'))
+            print(
+                (
+                    f"Rebinned from {1e-6*orig_bin_width:.1f} to "
+                    f"{1e-6*new_bin_width:.1f} MHz/bin, "
+                    f"trimming {remainder} bin(s)."
+                )
+            )
 
     def plot_sum_of_scans(self, x_lim=None, scan_index_range=None):
         """
@@ -160,32 +185,32 @@ class Measurement:
         :return: matplotlib figure object
         """
         if self.scan_count < 2:
-            raise AssertionError('Measurement must contain at least two scans.')
+            raise AssertionError("Measurement must contain at least two scans.")
 
         sum_fit_result = self.fit_sum_of_scans(scan_index_range=scan_index_range)
 
         fig, (ax, ax2) = plt.subplots(2, sharex=True, constrained_layout=True)
 
         # top plot: inhomogeneous line width (sum of scans)
-        ax.plot(1e-9 * self.exc_freq, sum_fit_result.data, label='Data')
-        ax.plot(1e-9 * self.exc_freq, sum_fit_result.best_fit, label='Gaussian Fit')
+        ax.plot(1e-9 * self.exc_freq, sum_fit_result.data, label="Data")
+        ax.plot(1e-9 * self.exc_freq, sum_fit_result.best_fit, label="Gaussian Fit")
 
-        fwhm_ghz = 1e-9 * sum_fit_result.params['fwhm'].value
+        fwhm_ghz = 1e-9 * sum_fit_result.params["fwhm"].value
         if fwhm_ghz < 1.0:
-            label = '$w$ = {:.0f} MHz'.format(1e3 * fwhm_ghz)
+            label = "$w$ = {:.0f} MHz".format(1e3 * fwhm_ghz)
         else:
-            label = '$w$ = {:.2f} GHz'.format(fwhm_ghz)
-        ax.plot([], [], 'w', label=label)
+            label = "$w$ = {:.2f} GHz".format(fwhm_ghz)
+        ax.plot([], [], "w", label=label)
 
         ax.ticklabel_format(scilimits=(-5, 3))
-        ax.set_ylabel('Counts per Bin')
+        ax.set_ylabel("Counts per Bin")
 
         # bottom plot: evolution of spectral position
         if scan_index_range is None:
             count_rate = self.count_rate
             scan_index = np.arange(self.scan_count)
         else:
-            count_rate = self.count_rate[scan_index_range[0]:scan_index_range[1], :]
+            count_rate = self.count_rate[scan_index_range[0] : scan_index_range[1], :]
             scan_index = np.arange(scan_index_range[0], scan_index_range[1])
         cf = ax2.contourf(1e-9 * self.exc_freq, scan_index, 1e-3 * count_rate)
 
@@ -193,19 +218,19 @@ class Measurement:
         # first plot has no colorbar, create spacer
         divider1 = make_axes_locatable(ax)
         cax1 = divider1.append_axes("right", size="5%", pad=0.05)
-        cax1.axis('off')
+        cax1.axis("off")
 
         # for actual colorbar
         divider2 = make_axes_locatable(ax2)
         cax2 = divider2.append_axes("right", size="5%", pad=0.05)
         cbar2 = fig.colorbar(cf, ax=ax2, cax=cax2)
-        cbar2.set_label('Count Rate (kHz)')
+        cbar2.set_label("Count Rate (kHz)")
 
-        ax2.set_xlabel('Excitation Frequency (GHz)')
-        ax2.set_ylabel('Scan Index')
+        ax2.set_xlabel("Excitation Frequency (GHz)")
+        ax2.set_ylabel("Scan Index")
 
-        ax.set_title(f'{self.timestamp} | {self.description}')
-        ax.autoscale(enable=True, axis='x', tight=True)
+        ax.set_title(f"{self.timestamp} | {self.description}")
+        ax.autoscale(enable=True, axis="x", tight=True)
         ax.set_ylim(0)
         ax.legend()
 
@@ -228,7 +253,9 @@ class Measurement:
         if scan_index_range is None:
             sum_of_scans = counts.sum(axis=0)
         else:
-            sum_of_scans = counts[scan_index_range[0]:scan_index_range[1], :].sum(axis=0)
+            sum_of_scans = counts[scan_index_range[0] : scan_index_range[1], :].sum(
+                axis=0
+            )
 
         model = fitting.gaussian
         params = model.make_params()
@@ -237,9 +264,9 @@ class Measurement:
         amp_guess = fitting.gauss_amplitude(sum_of_scans.max(), sigma_guess)
         center_guess = self.exc_freq[sum_of_scans.argmax()]
 
-        params['amplitude'].set(value=amp_guess, min=0)
-        params['sigma'].set(value=sigma_guess, max=sigma_max)
-        params['center'].set(value=center_guess)
+        params["amplitude"].set(value=amp_guess, min=0)
+        params["sigma"].set(value=sigma_guess, max=sigma_max)
+        params["center"].set(value=center_guess)
 
         return model.fit(sum_of_scans, x=self.exc_freq, params=params)
 
@@ -294,7 +321,7 @@ class Measurement:
         self.photon_count_mask = np.array(mask)
         return self.photon_count_mask
 
-    def fit_scans(self, model_name='Lorentzian', fwhm_guess=50e6):
+    def fit_scans(self, model_name="Lorentzian", fwhm_guess=50e6):
         """
         Fit all scans with a peak-like model.
         :param model_name: name of the model to use for fitting, can be Lorentzian, Gaussian, Pseudo Voigt and Voigt.
@@ -309,43 +336,47 @@ class Measurement:
         fwhm_guess_ghz = 1e-9 * fwhm_guess
         fwhm_max_ghz = exc_freq_centered_ghz.max() - exc_freq_centered_ghz.min()
 
-        if model_name == 'Gaussian':
+        if model_name == "Gaussian":
             model = fitting.gaussian
             sigma_guess = fitting.gauss_sigma(fwhm_guess_ghz)
             sigma_max = fitting.gauss_sigma(fwhm_max_ghz)
-        elif model_name == 'Lorentzian':
+        elif model_name == "Lorentzian":
             model = fitting.lorentzian
             sigma_guess = fitting.lorentz_sigma(fwhm_guess_ghz)
             sigma_max = fitting.lorentz_sigma(fwhm_max_ghz)
-        elif model_name == 'Pseudo Voigt':
+        elif model_name == "Pseudo Voigt":
             model = fitting.pseudo_voigt
             sigma_guess = fitting.lorentz_sigma(fwhm_guess_ghz)
             sigma_max = fitting.lorentz_sigma(fwhm_max_ghz)
-        elif model_name == 'Voigt':
+        elif model_name == "Voigt":
             model = fitting.voigt
             sigma_guess = fitting.voigt_sigma(fwhm_guess_ghz)
             sigma_max = fitting.voigt_sigma(fwhm_max_ghz)
 
             params = model.make_params()
-            params['gamma'].set(value=sigma_guess, vary=True, expr=None, min=0)
+            params["gamma"].set(value=sigma_guess, vary=True, expr=None, min=0)
         else:
-            raise AssertionError('Unknown fitting model.')
+            raise AssertionError("Unknown fitting model.")
 
         if params is None:
             params = model.make_params()
 
-        params['sigma'].set(value=sigma_guess, max=sigma_max)
-        params['amplitude'].set(value=8000)
+        params["sigma"].set(value=sigma_guess, max=sigma_max)
+        params["amplitude"].set(value=8000)
 
         results = []
-        for rate_single_scan, enough_photons in zip(self.count_rate, self.photon_count_mask):
+        for rate_single_scan, enough_photons in zip(
+            self.count_rate, self.photon_count_mask
+        ):
             if not enough_photons:
                 results.append(None)
                 continue
             f_max = exc_freq_centered_ghz[rate_single_scan.argmax()]
-            params['center'].set(value=f_max)
+            params["center"].set(value=f_max)
             try:
-                fit_result = model.fit(rate_single_scan, x=exc_freq_centered_ghz, params=params)
+                fit_result = model.fit(
+                    rate_single_scan, x=exc_freq_centered_ghz, params=params
+                )
             # unsuccessful fit
             except ValueError:
                 results.append(None)
@@ -366,12 +397,15 @@ class Measurement:
         # generate a meaningful title
         speed = 1e-9 * self.scan_speed
         n = self.scan_count
-        title = f'{self.timestamp} | {self.description} | {self.scan_direction:+} | {speed:.1f} GHz/s | {i}/{n}'
+        title = (
+            f"{self.timestamp} | {self.description} | {self.scan_direction:+} | "
+            f"{speed:.1f} GHz/s | {i}/{n}"
+        )
 
         fig, ax = plt.subplots(constrained_layout=True)
         ax.set_title(title)
 
-        ax.plot(1e-9 * self.exc_freq, 1e-3 * self.count_rate[i], '.-', label='Data')
+        ax.plot(1e-9 * self.exc_freq, 1e-3 * self.count_rate[i], ".-", label="Data")
 
         # if there is a fit result, plot the fit and some info
         fit_result = self.scan_fit_results[i]
@@ -379,30 +413,38 @@ class Measurement:
             # fitting is done with a recentered and rescaled exc_freq
             offset = self.exc_freq.mean()
             exc_freq_centered_ghz = 1e-9 * (self.exc_freq - offset)
-            freq_fit = np.linspace(exc_freq_centered_ghz.min(), exc_freq_centered_ghz.max(),
-                                   fit_eval_density * exc_freq_centered_ghz.size)
+            freq_fit = np.linspace(
+                exc_freq_centered_ghz.min(),
+                exc_freq_centered_ghz.max(),
+                fit_eval_density * exc_freq_centered_ghz.size,
+            )
             rate_fit = fit_result.eval(x=freq_fit)
             freq_max = 1e-9 * offset + freq_fit[rate_fit.argmax()]
 
             # reset centering and rescaling
-            fwhm = 1e9 * fit_result.params['fwhm'].value
-            center = offset + 1e9 * fit_result.params['center'].value
+            fwhm = 1e9 * fit_result.params["fwhm"].value
+            center = offset + 1e9 * fit_result.params["center"].value
 
-            ax.plot(1e-9 * offset + freq_fit, 1e-3 * rate_fit, 'r', label=self.scan_fit_model + ' Fit')
-            ax.plot([], [], 'w', label=f'w = {1e-6 * fwhm:.0f} MHz')
-            ax.plot([], [], 'w', label=f'$f_c$ = {1e-12 * center:.5f} THz')
+            ax.plot(
+                1e-9 * offset + freq_fit,
+                1e-3 * rate_fit,
+                "r",
+                label=self.scan_fit_model + " Fit",
+            )
+            ax.plot([], [], "w", label=f"w = {1e-6 * fwhm:.0f} MHz")
+            ax.plot([], [], "w", label=f"$f_c$ = {1e-12 * center:.5f} THz")
 
         # set limits if specified
         if fit_result and freq_range:
             freq_range_ghz = 1e-9 * freq_range
             ax.set_xlim([freq_max - freq_range_ghz / 2, freq_max + freq_range_ghz / 2])
         else:
-            ax.autoscale(axis='x', tight=True)
+            ax.autoscale(axis="x", tight=True)
 
         ax.set_ylim(0)
-        ax.set_xlabel('Laser Frequency (GHz)')
-        ax.set_ylabel('APD Signal (kc/s)')
-        ax.legend(loc='upper right')
+        ax.set_xlabel("Laser Frequency (GHz)")
+        ax.set_ylabel("APD Signal (kc/s)")
+        ax.legend(loc="upper right")
 
         return fig
 
@@ -415,15 +457,19 @@ class Measurement:
         # there is at least one successful fit
         else:
             list_of_dicts = []
-            params = ['fwhm', 'height', 'center', 'c']
-            nan_dict = {param: np.nan for param in params} | {f'{param}_stderr': np.nan for param in params}
+            params = ["fwhm", "height", "center", "c"]
+            nan_dict = {param: np.nan for param in params} | {
+                f"{param}_stderr": np.nan for param in params
+            }
             offset = self.exc_freq.mean()
 
             # collect the fit results
             for res in self.scan_fit_results:
                 if res:
                     value_dict = {param: res.params[param].value for param in params}
-                    stderr_dict = {f'{param}_stderr': res.params[param].stderr for param in params}
+                    stderr_dict = {
+                        f"{param}_stderr": res.params[param].stderr for param in params
+                    }
 
                     # replace None with nan for stderr
                     for key in stderr_dict:
@@ -431,14 +477,17 @@ class Measurement:
                             stderr_dict[key] = np.nan
 
                     # reset centering and rescaling
-                    value_dict['fwhm'] *= 1e9
-                    value_dict['center'] = offset + 1e9 * value_dict['center']
-                    stderr_dict['fwhm_stderr'] *= 1e9
-                    stderr_dict['center_stderr'] *= 1e9
+                    value_dict["fwhm"] *= 1e9
+                    value_dict["center"] = offset + 1e9 * value_dict["center"]
+                    stderr_dict["fwhm_stderr"] *= 1e9
+                    stderr_dict["center_stderr"] *= 1e9
 
                     # determine max count rate within fitted fwhm
-                    value_dict['max_rate_in_fwhm'] = fitting.max_within_fwhm(
-                        self.exc_freq, res.data, value_dict['center'], value_dict['fwhm']
+                    value_dict["max_rate_in_fwhm"] = fitting.max_within_fwhm(
+                        self.exc_freq,
+                        res.data,
+                        value_dict["center"],
+                        value_dict["fwhm"],
                     )
 
                     list_of_dicts.append(value_dict | stderr_dict)
@@ -448,22 +497,30 @@ class Measurement:
 
             df_fit_results = pd.DataFrame(list_of_dicts)
 
-        columns = ['timestamp', 'description', 'direction', 'scan_speed', 'scan_range', 'break_duration', 'bin_width',
-                   'fit_model']
+        columns = [
+            "timestamp",
+            "description",
+            "direction",
+            "scan_speed",
+            "scan_range",
+            "break_duration",
+            "bin_width",
+            "fit_model",
+        ]
         df_meas_info = pd.DataFrame(columns=columns)
 
-        df_index = pd.DataFrame(np.arange(self.scan_count), columns=['scan_index'])
+        df_index = pd.DataFrame(np.arange(self.scan_count), columns=["scan_index"])
 
         # concatenate the columns together
         df = pd.concat([df_meas_info, df_index, df_fit_results], axis=1)
 
-        df['timestamp'] = self.timestamp
-        df['description'] = self.description
-        df['direction'] = self.scan_direction
-        df['scan_speed'] = self.scan_speed
-        df['scan_range'] = self.freq_range
-        df['break_duration'] = self.break_duration
-        df['bin_width'] = self.bin_width
-        df['fit_model'] = self.scan_fit_model
+        df["timestamp"] = self.timestamp
+        df["description"] = self.description
+        df["direction"] = self.scan_direction
+        df["scan_speed"] = self.scan_speed
+        df["scan_range"] = self.freq_range
+        df["break_duration"] = self.break_duration
+        df["bin_width"] = self.bin_width
+        df["fit_model"] = self.scan_fit_model
 
         return df
