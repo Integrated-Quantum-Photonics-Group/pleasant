@@ -157,7 +157,8 @@ def test_plot_individual_scan_no_fit(measurement_with_fits):
     fig = measurement_with_fits.plot_individual_scan(15)
     assert len(fig.axes[0].lines) == 1
 
-def test_scan_fit_data(measurement_with_fits):
+def test_scan_fit_data(measurement_with_fits, shared_datadir):
     df = measurement_with_fits.scan_fit_data
-    # TODO: compare against complete data frame?
-    assert isinstance(df, pd.DataFrame)
+    df = df[:10]
+    df_ref = pd.read_pickle(str(shared_datadir)+'/scan_fit_data.pkl')
+    pd.testing.assert_frame_equal(df, df_ref)
