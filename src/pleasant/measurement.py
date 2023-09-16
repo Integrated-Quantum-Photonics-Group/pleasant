@@ -31,8 +31,8 @@ class Measurement:
         # make sure count_rate and exc_freq are arrays with the correct dimension
         try:
             dim = count_rate.ndim
-        except AttributeError:
-            raise AssertionError("count_rate should be a numpy array")
+        except AttributeError as e:
+            raise AssertionError("count_rate should be a numpy array") from e
         # if count_rate is a 1D array (only one scan was performed for this measurement), convert to 2D
         if dim == 1:
             count_rate = count_rate.reshape(1, count_rate.size)
@@ -43,8 +43,8 @@ class Measurement:
         try:
             if exc_freq.ndim != 1:
                 raise AssertionError("exc_freq should be a 1D numpy array")
-        except AttributeError:
-            raise AssertionError("exc_freq should be a numpy array")
+        except AttributeError as e:
+            raise AssertionError("exc_freq should be a numpy array") from e
 
         if count_rate.shape[1] != exc_freq.size:
             raise AssertionError(
@@ -366,7 +366,7 @@ class Measurement:
 
         results = []
         for rate_single_scan, enough_photons in zip(
-            self.count_rate, self.photon_count_mask
+            self.count_rate, self.photon_count_mask, strict=True
         ):
             if not enough_photons:
                 results.append(None)
