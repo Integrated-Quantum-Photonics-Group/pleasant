@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- More specific `rebin` and `rebin_to_width` methods to `Measurement`, replacing `rebin_data`.
+
+### Deprecated
+
+- Method `rebin_data` of `Measurement` class
+
 ## [1.1.0] - 2023-09-16
 
 ### Added

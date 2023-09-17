@@ -1,3 +1,5 @@
+import warnings
+
 import lmfit.model
 import matplotlib.figure
 import matplotlib.pyplot as plt
@@ -148,12 +150,42 @@ class Measurement:
         :param target_bin_width: Target bin width in Hz.
         A number of bins to merge will be calculated from this value.
         """
-        if not (bins_to_merge or target_bin_width):
-            raise AssertionError("Either size or bin_width must be specified.")
-        elif bins_to_merge and target_bin_width:
+        warnings.warn(
+            "Using rebin_data is deprecated. "
+            "Use the more specific rebin_to_width and rebin methods instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        if bins_to_merge:
+            self.rebin(bins_to_merge, verbose=verbose)
+        elif target_bin_width:
+            self.rebin_to_width(target_bin_width, verbose=verbose)
+        else:
             raise AssertionError(
-                "Either size or bin_width must be specified, not both."
+                "Either bins_to_merge or target_bin_width must be specified."
             )
+
+    def rebin_to_width(self, target_bin_width: float, verbose: bool = False) -> None:
+        """
+        Rebin the count rate matrix and the frequency vector to achieve a new bin width
+        as close as possible to target_bin_width.
+        :param target_bin_width: Target bin width in Hz.
+        :param verbose: print information about rebinning process
+        """
+        # calculate number of bins to merge
+        bins_to_merge = max(1, round(target_bin_width / self.bin_width))
+        self.rebin(bins_to_merge, verbose=verbose)
+
+    def rebin(self, bins_to_merge: int, verbose: bool = False) -> None:
+        """
+        Rebin the count rate matrix and the frequency vector to a lower resolution than
+        the original, increasing the bin width.
+        If necessary, bins at the high frequency end will be trimmed.
+        All previously performed fits and masks will be deleted.
+        :param bins_to_merge: Number of bins to merge and average over.
+        Factor that the bin count is reduced by.
+        :param verbose: print information about rebinning process
+        """
 
         # reset frequency and count_rate matrix to original binning
         self.count_rate = self._orig_count_rate
@@ -165,10 +197,6 @@ class Measurement:
         self.photon_count_mask = np.full(self.scan_count, True)
 
         orig_bin_width = self.bin_width
-
-        # if bin_width is given, calculate number of bins to merge
-        if target_bin_width:
-            bins_to_merge = max(1, round(target_bin_width / orig_bin_width))
 
         # trim some bins such that the original bin count
         # can be divided by bins_to_merge

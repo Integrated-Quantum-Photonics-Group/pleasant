@@ -111,20 +111,24 @@ def test_print_info(zero_measurement: Measurement, capsys):
     assert "Measurement" in captured.out
 
 
-def test_rebin_data_bins_to_merge(zero_measurement: Measurement):
-    zero_measurement.rebin_data(bins_to_merge=2)
+def test_rebin(zero_measurement: Measurement):
+    zero_measurement.rebin(bins_to_merge=2)
     assert zero_measurement.bin_count == 50
 
 
-def test_rebin_data_bins_to_merge_remainder(zero_measurement: Measurement, capsys):
-    zero_measurement.rebin_data(bins_to_merge=3, verbose=True)
+def test_rebin_remainder(zero_measurement: Measurement, capsys):
+    zero_measurement.rebin(bins_to_merge=3, verbose=True)
     captured = capsys.readouterr()
     assert "trimming 1 bin(s)" in captured.out
 
 
-def test_rebin_data_target_bin_width(zero_measurement: Measurement):
-    zero_measurement.rebin_data(target_bin_width=2)
+def test_rebin_to_width(zero_measurement: Measurement):
+    zero_measurement.rebin_to_width(target_bin_width=2)
     assert zero_measurement.bin_count == 50
+
+def test_rebin_data_deprecated(zero_measurement: Measurement):
+    with pytest.deprecated_call():
+        zero_measurement.rebin_data(bins_to_merge=2)
 
 
 # Tests with real data
