@@ -36,9 +36,9 @@ def get_spectral_diffusion_rates(
     Back- and forward scans (retrace and trace) are treated separately, i.e.
     the jump from one forward (backward) to the next forward (backward)
     scan is computed.
-    :param verbose: print statistics
     :param _df: data frame containing scan fit results in the format as retrieved
     from a Measurement object
+    :param verbose: print statistics
     :return: two-column array of time-normalized spectral jumps (value and error)
     """
     rates = np.empty((0, 2))

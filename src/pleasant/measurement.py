@@ -155,11 +155,12 @@ class Measurement:
         to merge or a target bin width.
         If necessary, bins at the high frequency end will be trimmed.
         All previously performed fits and masks will be deleted.
-        :param verbose: print information about rebinning process
         :param bins_to_merge: Number of bins to merge and average over.
         Factor that the bin count is reduced by.
         :param target_bin_width: Target bin width in Hz.
+        :param verbose: print information about rebinning process
         A number of bins to merge will be calculated from this value.
+        :raises AssertionError: if no keyword argument is given
         """
         warnings.warn(
             "Using rebin_data is deprecated. "
@@ -246,6 +247,7 @@ class Measurement:
         Sum up the counts of all scans and fit them with a Gaussian function.
         :param x_lim: limits for the x-axis
         :param scan_index_range: scans to sum up and display
+        :raises AssertionError: if measurement contains less than two scans
         :return: matplotlib figure object
         """
         if self.scan_count < 2:
@@ -310,7 +312,8 @@ class Measurement:
 
         A custom range may be specified.
         :param scan_index_range: scans to sum up
-        :return:
+        :raises AssertionError: if scan_duration is NaN
+        :return: fit result
         """
         if np.isnan(self.scan_speed):
             raise AssertionError('Attribute "scan_duration" must not be NaN.')
@@ -344,6 +347,7 @@ class Measurement:
         If a scan contains a single bin in which at least as many counts were
         registered as the threshold, it passes the filter.
         :param threshold: minimum counts in a bin to pass the filter
+        :raises AssertionError: if scan_duration is NaN
         :return: mask array
         """
         if np.isnan(self.scan_duration):
@@ -399,7 +403,7 @@ class Measurement:
         :param model_name: name of the model to use for fitting,
         can be Lorentzian, Gaussian, Pseudo Voigt and Voigt.
         :param fwhm_guess: initial value to use for the FWHM
-        :return:
+        :raises AssertionError: for unknown fitting model name
         """
         self.scan_fit_model = model_name
         params = None

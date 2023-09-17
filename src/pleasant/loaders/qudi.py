@@ -118,6 +118,7 @@ def _read_wavemeter_file(filename: str) -> tuple[float, float]:
         - the wavelength/frequency of the laser is read our precisely before and
         after each scan, not during a scan.
     :param filename: path to the qudi data file
+    :raises ValueError: if no valid wavemeter readings in file.
     :return: average frequency before the scan, average frequency after the scan
     """
     wavelengths = np.genfromtxt(filename)
@@ -145,6 +146,7 @@ def _read_data_files(
 
     :param filename_stub: stub from which all qudi data files can be derived
     :param which: whether to read trace or retrace files (scan direction)
+    :raises AssertionError: if keyword argument which is invalid
     :return: 1D or 2D count rates, 1D excitation frequencies, scan duration (in s)
     """
     # determine correct filenames depending on which argument
