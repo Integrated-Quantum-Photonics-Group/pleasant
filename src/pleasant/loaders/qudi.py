@@ -1,5 +1,7 @@
-"""A loader for data from the qudi (https://github.com/Ulm-IQO/qudi)
-laser scanner module."""
+"""A loader for data from qudi (https://github.com/Ulm-IQO/qudi).
+
+Specifically, data from the laser scanner module can be loaded.
+"""
 
 from os import listdir
 
@@ -13,8 +15,8 @@ __all__ = ["get_descriptions_in_folder", "load_qudi_folder"]
 
 
 def get_descriptions_in_folder(folder_name: str) -> list[str]:
-    """
-    Get all unique measurements descriptions of the qudi data files in a folder.
+    """Get all unique measurements descriptions of the qudi data files in a folder.
+
     :param folder_name: directory where the data files are located
     :return: list of unique descriptions
     """
@@ -28,8 +30,8 @@ def load_qudi_folder(
     description_contains: str = "",
     break_duration: float = np.nan,
 ) -> list[Measurement]:
-    """
-    Load all qudi data files contained in a folder into handy Measurement class objects.
+    """Load all qudi data files in folder into Measurement objects.
+
     There are four files per measurement pair:
         - a _volt_data_raw_trace.dat file containing a 2D matrix of the count rates
         registered during all scans
@@ -76,9 +78,9 @@ def load_qudi_folder(
 
 
 def _get_filename_stubs(folder_name: str) -> list[str]:
-    """
-    Generate a set of filename stubs that uniquely identify the measurement pairs
-    (trace and retrace)
+    """Generate a set of filename stubs that uniquely identify measurement pairs.
+
+    Pairs consist of a trace and retrace measurement.
     :param folder_name: directory where the data files are located
     :return: list of filename stubs
     """
@@ -90,8 +92,8 @@ def _get_filename_stubs(folder_name: str) -> list[str]:
 
 
 def _get_scan_params(filename: str) -> dict[str, float]:
-    """
-    Read header of a qudi data file and extract voltage scan parameters.
+    """Read header of a qudi data file and extract voltage scan parameters.
+
     :param filename: path to the qudi data file
     :return: dictionary containing voltage scan parameters
     """
@@ -106,8 +108,8 @@ def _get_scan_params(filename: str) -> dict[str, float]:
 
 
 def _read_wavemeter_file(filename: str) -> tuple[float, float]:
-    """
-    Read wavemeter file and compute average values for start and stop frequencies.
+    """Read wavemeter file and compute average values for start and stop frequencies.
+
     The excitation frequency during all scans of the measurement is then assumed as
     linear and equal for all scans.
     This approximation is only appropriate if during the course of a measurement:
@@ -139,8 +141,8 @@ def _read_wavemeter_file(filename: str) -> tuple[float, float]:
 def _read_data_files(
     filename_stub: str, which: str = "trace"
 ) -> tuple[np.ndarray, np.ndarray, float]:
-    """
-    Read main qudi data files containing the registered count rates during the scans.
+    """Read main qudi data files containing the registered count rates during the scans.
+
     :param filename_stub: stub from which all qudi data files can be derived
     :param which: whether to read trace or retrace files (scan direction)
     :return: 1D or 2D count rates, 1D excitation frequencies, scan duration (in s)
