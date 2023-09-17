@@ -126,6 +126,7 @@ def test_rebin_to_width(zero_measurement: Measurement):
     zero_measurement.rebin_to_width(target_bin_width=2)
     assert zero_measurement.bin_count == 50
 
+
 def test_rebin_data_deprecated(zero_measurement: Measurement):
     with pytest.deprecated_call():
         zero_measurement.rebin_data(bins_to_merge=2)
