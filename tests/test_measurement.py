@@ -171,25 +171,34 @@ def test_fit_scans(measurement_with_fits: Measurement):
             n_fit_result += 1
     assert n_fit_result == n_mask
 
-    fwhm = measurement_with_fits.scan_fit_results[0].params["fwhm"].value
+    fit_result = measurement_with_fits.scan_fit_results[0]
+    assert fit_result is not None
+
+    fwhm = fit_result.params["fwhm"].value
     assert round(fwhm, 3) == 0.043
 
 
 def test_fit_scans_gaussian(measurement_with_fits: Measurement):
     measurement_with_fits.fit_scans(model_name="Gaussian")
-    fwhm = measurement_with_fits.scan_fit_results[0].params["fwhm"].value
+    fit_result = measurement_with_fits.scan_fit_results[0]
+    assert fit_result is not None
+    fwhm = fit_result.params["fwhm"].value
     assert round(fwhm, 3) == 0.071
 
 
 def test_fit_scans_voigt(measurement_with_fits: Measurement):
     measurement_with_fits.fit_scans(model_name="Voigt")
-    fwhm = measurement_with_fits.scan_fit_results[0].params["fwhm"].value
+    fit_result = measurement_with_fits.scan_fit_results[0]
+    assert fit_result is not None
+    fwhm = fit_result.params["fwhm"].value
     assert round(fwhm, 3) == 0.071
 
 
 def test_fit_scans_pseudo_voigt(measurement_with_fits: Measurement):
     measurement_with_fits.fit_scans(model_name="Pseudo Voigt")
-    fwhm = measurement_with_fits.scan_fit_results[0].params["fwhm"].value
+    fit_result = measurement_with_fits.scan_fit_results[0]
+    assert fit_result is not None
+    fwhm = fit_result.params["fwhm"].value
     assert round(fwhm, 3) == 0.071
 
 
