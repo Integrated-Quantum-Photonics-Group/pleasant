@@ -1,3 +1,5 @@
+"""Custom fitting models and related functions."""
+
 import lmfit
 import numpy as np
 

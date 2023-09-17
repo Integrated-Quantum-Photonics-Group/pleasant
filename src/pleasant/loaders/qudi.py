@@ -1,3 +1,6 @@
+"""A loader for data from the qudi (https://github.com/Ulm-IQO/qudi)
+laser scanner module."""
+
 from os import listdir
 
 import numpy as np

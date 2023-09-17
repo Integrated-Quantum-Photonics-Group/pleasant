@@ -1,3 +1,5 @@
+"""The core data class of pleasant."""
+
 import warnings
 
 import lmfit.model
