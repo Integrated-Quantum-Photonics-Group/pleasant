@@ -31,6 +31,7 @@ pandas-stubs = "^2.0.3.230814"
 flake8-annotations = "^3.0.1"
 flake8-docstrings = "^1.7.0"
 pydoclint = {extras = ["flake8"], version = "^0.3.2"}
+sphinx = "^7.2.6"
 
 [tool.coverage.paths]
 source = ["src", "*/site-packages"]

@@ -14,7 +14,7 @@ def tests(session):
     session.run("pytest", "--cov")
 
 
-locations = "src", "tests", "noxfile.py"
+locations = "src", "tests", "noxfile.py", "docs/conf.py"
 
 
 @session(python="3.11")
@@ -47,3 +47,9 @@ def mypy(session):
     args = session.posargs or locations
     session.install("mypy", "pandas-stubs")
     session.run("mypy", *args)
+
+@session(python="3.11")
+def docs(session):
+    """Build the documentation."""
+    session.install("sphinx")
+    session.run("sphinx-build", "docs", "docs/_build")
