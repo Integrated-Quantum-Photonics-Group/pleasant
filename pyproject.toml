@@ -29,6 +29,7 @@ flake8-import-order = "^0.18.2"
 mypy = "^1.5.1"
 pandas-stubs = "^2.0.3.230814"
 flake8-annotations = "^3.0.1"
+flake8-docstrings = "^1.7.0"
 
 [tool.coverage.paths]
 source = ["src", "*/site-packages"]

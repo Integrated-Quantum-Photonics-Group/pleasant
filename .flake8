@@ -1,5 +1,5 @@
 [flake8]
-select = ANN,B,B9,BLK,C,E,F,W,I
+select = ANN,B,B9,BLK,C,D,E,F,W,I
 ignore = ANN101,E203,E501,W503
 max-line-length = 80
 application-import-names = pleasant,tests
