@@ -27,6 +27,7 @@ def lint(session):
         "flake8-black",
         "flake8-bugbear",
         "flake8-docstrings",
+        "pydoclint[flake8]",
         "flake8-import-order",
     )
     session.run("flake8", *args)

@@ -329,6 +329,14 @@ optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [[package]]
+name = "docstring-parser-fork"
+version = "0.0.4"
+description = "Parse Python docstrings in reST, Google and Numpydoc format"
+category = "dev"
+optional = false
+python-versions = ">=3.6,<4.0"
+
+[[package]]
 name = "exceptiongroup"
 version = "1.1.3"
 description = "Backport of PEP 654 (exception groups)"
@@ -1369,6 +1377,23 @@ optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [[package]]
+name = "pydoclint"
+version = "0.3.2"
+description = "A Python docstring linter that checks arguments, returns, yields, and raises sections"
+category = "dev"
+optional = false
+python-versions = ">=3.8"
+
+[package.dependencies]
+click = ">=8.0.0"
+docstring-parser-fork = ">=0.0.4"
+flake8 = {version = ">=4", optional = true, markers = "extra == \"flake8\""}
+tomli = {version = ">=2.0.1", markers = "python_version < \"3.11\""}
+
+[package.extras]
+flake8 = ["flake8 (>=4)"]
+
+[[package]]
 name = "pydocstyle"
 version = "6.3.0"
 description = "Python docstring style checker"
@@ -1878,7 +1903,7 @@ test = ["mypy", "pre-commit", "pytest", "pytest-asyncio", "websockets (>=10.0)"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.10,<3.13"
-content-hash = "fa715a35556e8780961090f4e86faa7d34375fb7a55d40cf142694cd34b932b1"
+content-hash = "deb6c30f93cbcb7772345e8c927cb03144b75d5415a7354c50ebb8483db6a4c7"
 
 [metadata.files]
 aiofiles = [
@@ -2278,6 +2303,10 @@ decorator = [
 defusedxml = [
     {file = "defusedxml-0.7.1-py2.py3-none-any.whl", hash = "sha256:a352e7e428770286cc899e2542b6cdaedb2b4953ff269a210103ec58f6198a61"},
     {file = "defusedxml-0.7.1.tar.gz", hash = "sha256:1bb3032db185915b62d7c6209c5a8792be6a32ab2fedacc84e01b52c51aa3e69"},
+]
+docstring-parser-fork = [
+    {file = "docstring_parser_fork-0.0.4-py3-none-any.whl", hash = "sha256:7f59547c76e96e5c1f872952accef88ae3cb2969c2451c0a4f2a668fd436be02"},
+    {file = "docstring_parser_fork-0.0.4.tar.gz", hash = "sha256:86ec8066e8fa4cee6994fe288aaf8f67956309e82edea4f64271e3c8fbfbd9a9"},
 ]
 exceptiongroup = [
     {file = "exceptiongroup-1.1.3-py3-none-any.whl", hash = "sha256:343280667a4585d195ca1cf9cef84a4e178c4b6cf2274caef9859782b567d5e3"},
@@ -2905,6 +2934,10 @@ pycodestyle = [
 pycparser = [
     {file = "pycparser-2.21-py2.py3-none-any.whl", hash = "sha256:8ee45429555515e1f6b185e78100aea234072576aa43ab53aefcae078162fca9"},
     {file = "pycparser-2.21.tar.gz", hash = "sha256:e644fdec12f7872f86c58ff790da456218b10f863970249516d60a5eaca77206"},
+]
+pydoclint = [
+    {file = "pydoclint-0.3.2-py2.py3-none-any.whl", hash = "sha256:1b9342f35fa58aae7f4b274711d347be66378f697f4dd254d876381ff4de78a8"},
+    {file = "pydoclint-0.3.2.tar.gz", hash = "sha256:cc81f7c3b0dcd8869072b324a8995b2257257988c85964f3a376279ef2bb29f9"},
 ]
 pydocstyle = [
     {file = "pydocstyle-6.3.0-py3-none-any.whl", hash = "sha256:118762d452a49d6b05e194ef344a55822987a462831ade91ec5c06fd2169d019"},
