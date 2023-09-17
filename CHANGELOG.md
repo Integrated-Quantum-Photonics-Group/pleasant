@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Default value of `break_duration` in `qudi` loader is now `NaN`.
+- A few incorrect type annotations.
 
 ## [1.1.0] - 2023-09-16
 

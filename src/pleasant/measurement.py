@@ -227,7 +227,7 @@ class Measurement:
     def plot_sum_of_scans(
         self,
         x_lim: tuple[float, float] | None = None,
-        scan_index_range: tuple[float, float] | None = None,
+        scan_index_range: tuple[int, int] | None = None,
     ) -> matplotlib.figure.Figure:
         """
         Plot the count rates as a 2D image, sum up the counts of all scans
@@ -292,7 +292,7 @@ class Measurement:
         return fig
 
     def fit_sum_of_scans(
-        self, scan_index_range: tuple[float, float] | None = None
+        self, scan_index_range: tuple[int, int] | None = None
     ) -> lmfit.model.ModelResult:
         """
         Sum up the counts of all scans or a selected range
@@ -448,7 +448,7 @@ class Measurement:
     def plot_individual_scan(
         self,
         i: int,
-        freq_range: tuple[float, float] | None = None,
+        freq_range: float | None = None,
         fit_eval_density: int = 1,
     ) -> matplotlib.figure.Figure:
         """
@@ -496,7 +496,7 @@ class Measurement:
                 1e-9 * offset + freq_fit,
                 1e-3 * rate_fit,
                 "r",
-                label=self.scan_fit_model + " Fit",
+                label=f"{self.scan_fit_model} Fit",
             )
             ax.plot([], [], "w", label=f"w = {1e-6 * fwhm:.0f} MHz")
             ax.plot([], [], "w", label=f"$f_c$ = {1e-12 * center:.5f} THz")
