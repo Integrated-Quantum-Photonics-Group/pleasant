@@ -1,6 +1,10 @@
 [flake8]
-select = B,B9,BLK,C,E,F,W,I
-ignore = E203,E501,W503
+select = ANN,B,B9,BLK,C,E,F,W,I
+ignore = ANN101,E203,E501,W503
 max-line-length = 80
 application-import-names = pleasant,tests
 import-order-style = google
+mypy-init-return = true
+per-file-ignores =
+    tests/*:ANN
+    noxfile.py:ANN

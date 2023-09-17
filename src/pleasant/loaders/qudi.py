@@ -9,7 +9,7 @@ from pleasant.measurement import Measurement
 __all__ = ["get_descriptions_in_folder", "load_qudi_folder"]
 
 
-def get_descriptions_in_folder(folder_name):
+def get_descriptions_in_folder(folder_name: str) -> list[str]:
     """
     Get all unique measurements descriptions of the qudi data files in a folder.
     :param folder_name: directory where the data files are located
@@ -20,7 +20,11 @@ def get_descriptions_in_folder(folder_name):
     return list(descriptions)
 
 
-def load_qudi_folder(folder_name, description_contains="", break_duration=None):
+def load_qudi_folder(
+    folder_name: str,
+    description_contains: str = "",
+    break_duration: float = np.nan,
+) -> list[Measurement]:
     """
     Load all qudi data files contained in a folder into handy Measurement class objects.
     There are four files per measurement pair:
@@ -68,7 +72,7 @@ def load_qudi_folder(folder_name, description_contains="", break_duration=None):
     return _measurements
 
 
-def _get_filename_stubs(folder_name):
+def _get_filename_stubs(folder_name: str) -> list[str]:
     """
     Generate a set of filename stubs that uniquely identify the measurement pairs
     (trace and retrace)
@@ -82,7 +86,7 @@ def _get_filename_stubs(folder_name):
     return filename_stubs
 
 
-def _get_scan_params(filename):
+def _get_scan_params(filename: str) -> dict[str, float]:
     """
     Read header of a qudi data file and extract voltage scan parameters.
     :param filename: path to the qudi data file
@@ -98,7 +102,7 @@ def _get_scan_params(filename):
     return p_dict
 
 
-def _read_wavemeter_file(filename):
+def _read_wavemeter_file(filename: str) -> tuple[float, float]:
     """
     Read wavemeter file and compute average values for start and stop frequencies.
     The excitation frequency during all scans of the measurement is then assumed as
@@ -129,7 +133,9 @@ def _read_wavemeter_file(filename):
     return avg_start_freq, avg_stop_freq
 
 
-def _read_data_files(filename_stub, which="trace"):
+def _read_data_files(
+    filename_stub: str, which: str = "trace"
+) -> tuple[np.ndarray, np.ndarray, float]:
     """
     Read main qudi data files containing the registered count rates during the scans.
     :param filename_stub: stub from which all qudi data files can be derived

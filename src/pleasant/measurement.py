@@ -1,3 +1,7 @@
+import warnings
+
+import lmfit.model
+import matplotlib.figure
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import numpy as np
@@ -9,12 +13,12 @@ from pleasant import fitting
 class Measurement:
     def __init__(
         self,
-        count_rate,
-        exc_freq,
-        timestamp=None,
-        description=None,
-        scan_duration=np.nan,
-        break_duration=np.nan,
+        count_rate: np.ndarray,
+        exc_freq: np.ndarray,
+        timestamp: str | None = None,
+        description: str | None = None,
+        scan_duration: float = np.nan,
+        break_duration: float = np.nan,
     ):
         """
         A Measurement represents a sequence of subsequent resonant absorption scans.
@@ -57,38 +61,40 @@ class Measurement:
             )
 
         # if all checks are passed, assign them to object attributes
-        self._orig_count_rate = count_rate
-        self._orig_exc_freq = exc_freq
-        self.count_rate = self._orig_count_rate
-        self.exc_freq = self._orig_exc_freq
-        self._scan_direction = None
+        self._orig_count_rate: np.ndarray = count_rate
+        self._orig_exc_freq: np.ndarray = exc_freq
+        self.count_rate: np.ndarray = self._orig_count_rate
+        self.exc_freq: np.ndarray = self._orig_exc_freq
+        self._scan_direction: int | None = None
 
-        self.timestamp = timestamp
-        self.description = description
-        self.scan_duration = scan_duration
-        self.break_duration = break_duration
+        self.timestamp: str | None = timestamp
+        self.description: str | None = description
+        self.scan_duration: float = scan_duration
+        self.break_duration: float = break_duration
 
-        self.scan_fit_results = [None for _ in range(self.scan_count)]
-        self.scan_fit_model = None
-        self.photon_count_mask = np.full(self.scan_count, True)
+        self.scan_fit_results: list[None | lmfit.model.ModelResult] = [
+            None for _ in range(self.scan_count)
+        ]
+        self.scan_fit_model: str | None = None
+        self.photon_count_mask: np.ndarray = np.full(self.scan_count, True)
 
     @property
-    def scan_count(self):
+    def scan_count(self) -> int:
         """Number of scans performed for this measurement."""
         return self.count_rate.shape[0]
 
     @property
-    def bin_count(self):
+    def bin_count(self) -> int:
         """Number of bins a scan is divided into."""
         return self.count_rate.shape[1]
 
     @property
-    def freq_range(self):
+    def freq_range(self) -> float:
         """Scanned frequency range in Hz."""
         return self.exc_freq.max() - self.exc_freq.min()
 
     @property
-    def scan_direction(self):
+    def scan_direction(self) -> int:
         """Returns +1 or -1 depending on whether the scan is performed
         towards positive or negative frequency direction."""
         if self._scan_direction:
@@ -106,16 +112,16 @@ class Measurement:
             return self._scan_direction
 
     @property
-    def scan_speed(self):
+    def scan_speed(self) -> float:
         """Scan speed in Hz/s."""
         return self.freq_range / self.scan_duration
 
     @property
-    def bin_width(self):
+    def bin_width(self) -> float:
         """Frequency range that a single bin spans (in Hz)."""
         return self.freq_range / self.bin_count
 
-    def print_info(self):
+    def print_info(self) -> None:
         """Print information on this measurement."""
         print("Measurement")
         print(
@@ -126,7 +132,12 @@ class Measurement:
             f"{1e-9 * self.scan_speed:.2f} GHz/s"
         )
 
-    def rebin_data(self, bins_to_merge=None, target_bin_width=None, verbose=False):
+    def rebin_data(
+        self,
+        bins_to_merge: int | None = None,
+        target_bin_width: float | None = None,
+        verbose: bool = False,
+    ) -> None:
         """
         Rebin the count rate matrix and the frequency vector to a lower resolution than
         the original, increasing the bin width. You can specify either a number of bins
@@ -139,12 +150,42 @@ class Measurement:
         :param target_bin_width: Target bin width in Hz.
         A number of bins to merge will be calculated from this value.
         """
-        if not (bins_to_merge or target_bin_width):
-            raise AssertionError("Either size or bin_width must be specified.")
-        elif bins_to_merge and target_bin_width:
+        warnings.warn(
+            "Using rebin_data is deprecated. "
+            "Use the more specific rebin_to_width and rebin methods instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        if bins_to_merge:
+            self.rebin(bins_to_merge, verbose=verbose)
+        elif target_bin_width:
+            self.rebin_to_width(target_bin_width, verbose=verbose)
+        else:
             raise AssertionError(
-                "Either size or bin_width must be specified, not both."
+                "Either bins_to_merge or target_bin_width must be specified."
             )
+
+    def rebin_to_width(self, target_bin_width: float, verbose: bool = False) -> None:
+        """
+        Rebin the count rate matrix and the frequency vector to achieve a new bin width
+        as close as possible to target_bin_width.
+        :param target_bin_width: Target bin width in Hz.
+        :param verbose: print information about rebinning process
+        """
+        # calculate number of bins to merge
+        bins_to_merge = max(1, round(target_bin_width / self.bin_width))
+        self.rebin(bins_to_merge, verbose=verbose)
+
+    def rebin(self, bins_to_merge: int, verbose: bool = False) -> None:
+        """
+        Rebin the count rate matrix and the frequency vector to a lower resolution than
+        the original, increasing the bin width.
+        If necessary, bins at the high frequency end will be trimmed.
+        All previously performed fits and masks will be deleted.
+        :param bins_to_merge: Number of bins to merge and average over.
+        Factor that the bin count is reduced by.
+        :param verbose: print information about rebinning process
+        """
 
         # reset frequency and count_rate matrix to original binning
         self.count_rate = self._orig_count_rate
@@ -156,10 +197,6 @@ class Measurement:
         self.photon_count_mask = np.full(self.scan_count, True)
 
         orig_bin_width = self.bin_width
-
-        # if bin_width is given, calculate number of bins to merge
-        if target_bin_width:
-            bins_to_merge = max(1, round(target_bin_width / orig_bin_width))
 
         # trim some bins such that the original bin count
         # can be divided by bins_to_merge
@@ -187,7 +224,11 @@ class Measurement:
                 )
             )
 
-    def plot_sum_of_scans(self, x_lim=None, scan_index_range=None):
+    def plot_sum_of_scans(
+        self,
+        x_lim: tuple[float, float] | None = None,
+        scan_index_range: tuple[int, int] | None = None,
+    ) -> matplotlib.figure.Figure:
         """
         Plot the count rates as a 2D image, sum up the counts of all scans
         and fit them with a Gaussian function.
@@ -250,7 +291,9 @@ class Measurement:
 
         return fig
 
-    def fit_sum_of_scans(self, scan_index_range=None):
+    def fit_sum_of_scans(
+        self, scan_index_range: tuple[int, int] | None = None
+    ) -> lmfit.model.ModelResult:
         """
         Sum up the counts of all scans or a selected range
         and fit them with a Gaussian function.
@@ -282,7 +325,7 @@ class Measurement:
 
         return model.fit(sum_of_scans, x=self.exc_freq, params=params)
 
-    def photon_count_filter(self, threshold):
+    def photon_count_filter(self, threshold: int) -> np.ndarray:
         """
         Creates a mask depending on a very simple photon count filtering condition.
         The mask is used when scans are fitted later.
@@ -307,7 +350,7 @@ class Measurement:
         self.photon_count_mask = (absolute_photon_count >= threshold).any(axis=1)
         return self.photon_count_mask
 
-    def peak_window_filter(self, min_snr=3, window=10):
+    def peak_window_filter(self, min_snr: int = 3, window: int = 10) -> np.ndarray:
         """
         Creates a mask by averaging the count rate in a window around the global maximum
         and comparing it to the overall average count rate.
@@ -335,7 +378,9 @@ class Measurement:
         self.photon_count_mask = np.array(mask)
         return self.photon_count_mask
 
-    def fit_scans(self, model_name="Lorentzian", fwhm_guess=50e6):
+    def fit_scans(
+        self, model_name: str = "Lorentzian", fwhm_guess: float = 50e6
+    ) -> None:
         """
         Fit all scans with a peak-like model.
         :param model_name: name of the model to use for fitting,
@@ -379,7 +424,7 @@ class Measurement:
         params["sigma"].set(value=sigma_guess, max=sigma_max)
         params["amplitude"].set(value=8000)
 
-        results = []
+        results: list[None | lmfit.model.ModelResult] = []
         for rate_single_scan, enough_photons in zip(
             self.count_rate, self.photon_count_mask, strict=True
         ):
@@ -400,7 +445,12 @@ class Measurement:
 
         self.scan_fit_results = results
 
-    def plot_individual_scan(self, i, freq_range=None, fit_eval_density=1):
+    def plot_individual_scan(
+        self,
+        i: int,
+        freq_range: float | None = None,
+        fit_eval_density: int = 1,
+    ) -> matplotlib.figure.Figure:
         """
         Plot an individual scan. The fit is included if it was performed before.
         :param i: Scan index to plot.
@@ -446,7 +496,7 @@ class Measurement:
                 1e-9 * offset + freq_fit,
                 1e-3 * rate_fit,
                 "r",
-                label=self.scan_fit_model + " Fit",
+                label=f"{self.scan_fit_model} Fit",
             )
             ax.plot([], [], "w", label=f"w = {1e-6 * fwhm:.0f} MHz")
             ax.plot([], [], "w", label=f"$f_c$ = {1e-12 * center:.5f} THz")
@@ -466,7 +516,7 @@ class Measurement:
         return fig
 
     @property
-    def scan_fit_data(self):
+    def scan_fit_data(self) -> pd.DataFrame:
         """Scan fit data as a pandas data frame. Rows correspond to individual scans."""
         # check if there are any successful fits
         if self.scan_fit_results.count(None) == len(self.scan_fit_results):

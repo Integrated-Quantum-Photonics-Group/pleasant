@@ -9,51 +9,51 @@ pseudo_voigt = lmfit.models.PseudoVoigtModel() + lmfit.models.ConstantModel()
 voigt = lmfit.models.VoigtModel() + lmfit.models.ConstantModel()
 
 
-def gauss_sigma(fwhm):
+def gauss_sigma(fwhm: float) -> float:
     return fwhm / (2 * np.sqrt(2 * np.log(2)))
 
 
-def lorentz_sigma(fwhm):
+def lorentz_sigma(fwhm: float) -> float:
     return fwhm / 2
 
 
-def voigt_sigma(fwhm):
+def voigt_sigma(fwhm: float) -> float:
     return fwhm / 3.6013  # approximate
 
 
-def gauss_fwhm(sigma):
+def gauss_fwhm(sigma: float) -> float:
     return sigma * (2 * np.sqrt(2 * np.log(2)))
 
 
-def lorentz_fwhm(sigma):
+def lorentz_fwhm(sigma: float) -> float:
     return sigma * 2
 
 
-def gauss_amplitude(height, sigma):
+def gauss_amplitude(height: float, sigma: float) -> float:
     return height * sigma * np.sqrt(2 * np.pi)
 
 
-def gauss_height(amplitude, sigma):
+def gauss_height(amplitude: float, sigma: float) -> float:
     return amplitude / (sigma * np.sqrt(2 * np.pi))
 
 
-def lorentz_amplitude(height, sigma):
+def lorentz_amplitude(height: float, sigma: float) -> float:
     return height * np.pi * sigma
 
 
-def lorentz_height(amplitude, sigma):
+def lorentz_height(amplitude: float, sigma: float) -> float:
     return amplitude / (np.pi * sigma)
 
 
-def voigt_amplitude(height, sigma):
+def voigt_amplitude(height: float, sigma: float) -> float:
     return gauss_amplitude(height, sigma)
 
 
-def voigt_height(amplitude, sigma):
+def voigt_height(amplitude: float, sigma: float) -> float:
     return gauss_height(amplitude, sigma)
 
 
-def max_within_fwhm(x, y, x_c, fwhm):
+def max_within_fwhm(x: np.ndarray, y: np.ndarray, x_c: float, fwhm: float) -> float:
     """
     Determine maximum of y within an area of width fwhm around x_c
     :param x: x values
