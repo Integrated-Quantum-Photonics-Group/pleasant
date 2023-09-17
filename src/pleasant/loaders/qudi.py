@@ -23,7 +23,7 @@ def get_descriptions_in_folder(folder_name: str) -> list[str]:
 def load_qudi_folder(
     folder_name: str,
     description_contains: str = "",
-    break_duration: float | None = None,
+    break_duration: float = np.nan,
 ) -> list[Measurement]:
     """
     Load all qudi data files contained in a folder into handy Measurement class objects.
