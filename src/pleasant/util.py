@@ -10,7 +10,7 @@ def inv_variance_weighting(a: np.ndarray) -> tuple[float, float]:
     """Calculate inverse variance weighted average and standard deviation.
 
     :param a: two-column array containing values in the first and errors
-    in the second column
+        in the second column
     :return: average value, standard deviation
     """
     # filter out pairs where either value or error is nan
@@ -36,8 +36,9 @@ def get_spectral_diffusion_rates(
     Back- and forward scans (retrace and trace) are treated separately, i.e.
     the jump from one forward (backward) to the next forward (backward)
     scan is computed.
+
     :param _df: data frame containing scan fit results in the format as retrieved
-    from a Measurement object
+        from a Measurement object
     :param verbose: print statistics
     :return: two-column array of time-normalized spectral jumps (value and error)
     """

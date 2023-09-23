@@ -34,14 +34,14 @@ class Measurement:
         """Init Measurement with data.
 
         :param count_rate: 1D (only one scan) or 2D (multiple scans) numpy array
-        containing the measured count rates
+            containing the measured count rates
         :param exc_freq: 1D numpy array of the scanned excitation frequencies (in Hz)
         :param timestamp: string specifying when the measurement was taken
         :param description: details about the measurement, e.g. excitation power or
-        source identifier
+            source identifier
         :param scan_duration: time taken for an individual scan (in s)
         :param break_duration: time between individual scans
-        (not accounting for potential backwards scan)
+            (not accounting for potential backwards scan)
         """
         # make sure count_rate and exc_freq are arrays with the correct dimension
         try:
@@ -155,11 +155,12 @@ class Measurement:
         to merge or a target bin width.
         If necessary, bins at the high frequency end will be trimmed.
         All previously performed fits and masks will be deleted.
+
         :param bins_to_merge: Number of bins to merge and average over.
-        Factor that the bin count is reduced by.
+            Factor that the bin count is reduced by.
         :param target_bin_width: Target bin width in Hz.
         :param verbose: print information about rebinning process
-        A number of bins to merge will be calculated from this value.
+            A number of bins to merge will be calculated from this value.
         :raises AssertionError: if no keyword argument is given
         """
         warnings.warn(
@@ -182,6 +183,7 @@ class Measurement:
 
         Rebin the count rate matrix and the frequency vector to achieve a new bin width
         as close as possible to target_bin_width.
+
         :param target_bin_width: Target bin width in Hz.
         :param verbose: print information about rebinning process
         """
@@ -196,8 +198,9 @@ class Measurement:
         the original, increasing the bin width.
         If necessary, bins at the high frequency end will be trimmed.
         All previously performed fits and masks will be deleted.
+
         :param bins_to_merge: Number of bins to merge and average over.
-        Factor that the bin count is reduced by.
+            Factor that the bin count is reduced by.
         :param verbose: print information about rebinning process
         """
         # reset frequency and count_rate matrix to original binning
@@ -245,6 +248,7 @@ class Measurement:
         """Plot the count rates as a 2D image.
 
         Sum up the counts of all scans and fit them with a Gaussian function.
+
         :param x_lim: limits for the x-axis
         :param scan_index_range: scans to sum up and display
         :raises AssertionError: if measurement contains less than two scans
@@ -311,6 +315,7 @@ class Measurement:
         """Sum up the counts of all scans and fit the result with a Gaussian function.
 
         A custom range may be specified.
+
         :param scan_index_range: scans to sum up
         :raises AssertionError: if scan_duration is NaN
         :return: fit result
@@ -346,6 +351,7 @@ class Measurement:
         The mask is used when scans are fitted later.
         If a scan contains a single bin in which at least as many counts were
         registered as the threshold, it passes the filter.
+
         :param threshold: minimum counts in a bin to pass the filter
         :raises AssertionError: if scan_duration is NaN
         :return: mask array
@@ -371,8 +377,9 @@ class Measurement:
 
         The mask is created by averaging the count rate in a window around
         the global maximum and comparing it to the overall average count rate.
+
         :param min_snr: threshold value for how many times the count rate in the peak
-        window should exceed the average
+            window should exceed the average
         :param window: size of the window around the peak in number of samples
         :return: mask array
         """
@@ -401,7 +408,7 @@ class Measurement:
         """Fit all scans with a peak-like model.
 
         :param model_name: name of the model to use for fitting,
-        can be Lorentzian, Gaussian, Pseudo Voigt and Voigt.
+            can be Lorentzian, Gaussian, Pseudo Voigt and Voigt.
         :param fwhm_guess: initial value to use for the FWHM
         :raises AssertionError: for unknown fitting model name
         """
@@ -471,11 +478,12 @@ class Measurement:
         """Plot an individual scan.
 
         The fit is included if it was performed before.
+
         :param i: Scan index to plot.
         :param freq_range: If specified, trim the plot to this range (in Hz) around
-        the fitted center frequency.
+            the fitted center frequency.
         :param fit_eval_density: factor to increase fit smoothness by evaluation
-        at more data points
+            at more data points
         :return: matplotlib figure object
         """
         # generate a meaningful title

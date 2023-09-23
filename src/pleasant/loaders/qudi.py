@@ -33,15 +33,16 @@ def load_qudi_folder(
     """Load all qudi data files in folder into Measurement objects.
 
     There are four files per measurement pair:
-        - a _volt_data_raw_trace.dat file containing a 2D matrix of the count rates
-        registered during all scans
-        - a _wl_data_trace.dat file containing the wavemeter readings before
-        and after each scan
+        - a ``_volt_data_raw_trace.dat`` file containing a 2D matrix of the count rates
+            registered during all scans
+        - a ``_wl_data_trace.dat`` file containing the wavemeter readings before
+            and after each scan
         - retrace versions of the above containing the same data but for scans
-        in the opposite spectral direction
+            in the opposite spectral direction
+
     :param folder_name: directory where the data files are located
     :param description_contains: filenames that do not contain this string
-    in the description part will be ignored
+        in the description part will be ignored
     :param break_duration: argument to be passed on to the Measurement object creator
     :return: list of Measurement objects
     """
