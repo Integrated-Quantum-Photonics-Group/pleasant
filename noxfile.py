@@ -48,8 +48,9 @@ def mypy(session):
     session.install("mypy", "pandas-stubs")
     session.run("mypy", *args)
 
+
 @session(python="3.11")
 def docs(session):
     """Build the documentation."""
-    session.install("sphinx")
+    session.install("sphinx", "sphinx-autodoc-typehints", ".")
     session.run("sphinx-build", "docs", "docs/_build")
