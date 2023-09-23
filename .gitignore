@@ -4,3 +4,6 @@ __pycache__/
 .idea/
 .python-version
 *.dat
+docs/_build
+dist
+.coverage

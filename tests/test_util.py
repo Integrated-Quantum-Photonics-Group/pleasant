@@ -1,3 +1,5 @@
+"""Test utility functions."""
+
 import numpy as np
 import pandas as pd
 
@@ -5,7 +7,7 @@ from pleasant.util import get_spectral_diffusion_rates, inv_variance_weighting
 
 
 def test_inv_variance_weighting():
-    """Compute the inverse variance weighted average in a simple case."""
+    """Inverse variance weighting works in a simple case."""
     n = 10
     y = 1.0
     y_std = 0.5
@@ -18,6 +20,7 @@ def test_inv_variance_weighting():
 
 
 def test_spectral_diffusion_rates(shared_datadir):
+    """Spectral diffusion rate computation works for example data."""
     df = pd.read_pickle(str(shared_datadir) + "/scan_fit_data.pkl")
     # does not work without timestamps and break duration
     df["timestamp"] = 0

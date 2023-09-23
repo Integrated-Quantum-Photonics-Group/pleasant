@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Module-level docstrings.
+- Docstrings to test suite and nox file.
+- Docstring linting.
 - Type annotations and automatic static type checking.
 - More specific `rebin` and `rebin_to_width` methods to `Measurement`, replacing `rebin_data`.
 
