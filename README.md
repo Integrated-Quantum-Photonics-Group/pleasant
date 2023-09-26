@@ -1,6 +1,7 @@
 # pleasant
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Tests](https://github.com/Integrated-Quantum-Photonics-Group/pleasant/workflows/Tests/badge.svg)](https://github.com/Integrated-Quantum-Photonics-Group/pleasant/actions?workflow=Tests)
 
 ## Overview
 
