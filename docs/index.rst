@@ -1,4 +1,4 @@
-pleasant
+PLEasant
 ========
 
 .. toctree::
@@ -30,11 +30,11 @@ you can still make use of all data analysis features of this package.
 Attribution
 -----------
 
-If you are publishing any work based on using pleasant as an analysis tool,
+If you are publishing any work based on using PLEasant as an analysis tool,
 please mention it e.g. in the methods section
 and consider citing the original scientific work that this package was written for:
 
-`Optically coherent nitrogen-vacancy defect centers in diamond nanostructures <https://arxiv.org/abs/2203.05605>`_
+`Optically coherent nitrogen-vacancy defect centers in diamond nanostructures <https://doi.org/10.1103/PhysRevX.13.011042>`_
 
 Features
 --------
@@ -58,7 +58,7 @@ Features
 Installation
 ------------
 
-pleasant is provided as a pip-installable Python package.
+PLEasant is provided as a pip-installable Python package.
 You can clone or download this repository
 to your local machine and install the package by running
 
