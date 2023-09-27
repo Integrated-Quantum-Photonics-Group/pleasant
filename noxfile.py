@@ -54,3 +54,11 @@ def docs(session):
     """Build the documentation."""
     session.install("sphinx", "sphinx-autodoc-typehints", ".")
     session.run("sphinx-build", "docs", "docs/_build")
+
+
+@session(python="3.11")
+def coverage(session):
+    """Upload coverage data."""
+    session.install("coverage[toml]", "codecov")
+    session.run("coverage", "xml")
+    session.run("codecov", *session.posargs)

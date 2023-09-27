@@ -1,0 +1,17 @@
+name: Coverage
+on: push
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        architecture: x64
+    - run: pip install nox==2023.4.22
+    - run: pip install poetry==1.2.2
+    - run: pip install nox_poetry==1.0.3
+    - run: nox --sessions tests-3.11 coverage
+      env:
+        CODECOV_TOKEN: ${{secrets.CODECOV_TOKEN}}
