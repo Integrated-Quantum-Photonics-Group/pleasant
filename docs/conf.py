@@ -10,5 +10,5 @@ extensions = [
 html_theme = "alabaster"
 html_theme_options = {
     "description": "Routines for post-processing and analyzing PLE experiment data.",
-    "sidebar_width": "30%"
+    "sidebar_width": "30%",
 }
