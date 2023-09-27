@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- CD: Docs deployment to GitHub Pages.
 - CI: Testing workflow.
 - Module-level docstrings.
 - Docstrings to test suite and nox file.
