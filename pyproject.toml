@@ -33,6 +33,7 @@ flake8-docstrings = "^1.7.0"
 pydoclint = {extras = ["flake8"], version = "^0.3.2"}
 sphinx = "^7.2.6"
 sphinx-autodoc-typehints = "^1.24.0"
+codecov = "^2.1.13"
 
 [tool.coverage.paths]
 source = ["src", "*/site-packages"]
