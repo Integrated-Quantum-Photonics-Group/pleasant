@@ -1,5 +1,5 @@
 """Sphinx configuration."""
-project = "pleasant"
+project = "PLEasant"
 author = "Kilian Unterguggenberger"
 copyright = f"2023, {author}"
 extensions = [
@@ -8,4 +8,7 @@ extensions = [
     "sphinx_autodoc_typehints",
 ]
 html_theme = "alabaster"
-html_theme_options = {"sidebar_width": "30%"}
+html_theme_options = {
+    "description": "Routines for post-processing and analyzing PLE experiment data.",
+    "sidebar_width": "30%"
+}

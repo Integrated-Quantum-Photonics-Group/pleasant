@@ -1,4 +1,4 @@
-pleasant
+PLEasant
 ========
 
 .. toctree::
