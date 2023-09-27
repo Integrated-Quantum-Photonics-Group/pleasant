@@ -4,7 +4,7 @@ import nox
 from nox_poetry import session
 
 
-nox.options.sessions = "lint", "mypy", "tests"
+nox.options.sessions = "lint", "mypy", "tests", "docs"
 
 
 @session(python=["3.11", "3.10"])
