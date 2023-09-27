@@ -4,6 +4,7 @@ author = "Kilian Unterguggenberger"
 copyright = f"2023, {author}"
 extensions = [
     "sphinx.ext.autodoc",
+    "sphinx.ext.githubpages",
     "sphinx_autodoc_typehints",
 ]
 html_theme = "alabaster"
