@@ -9,8 +9,10 @@ import glob
 from configparser import ConfigParser
 from datetime import datetime
 
+import matplotlib.pyplot as plt
+from matplotlib import ticker
 import numpy as np
-from scipy.constants import speed_of_light
+import lmfit
 
 from pleasant.measurement import Measurement
 
@@ -18,7 +20,7 @@ from pleasant.measurement import Measurement
 __all__ = ["load_folder"]
 
 
-def load_folder(folder, t_start_offset=0.2):
+def load_folder(folder, plot=True):
     data_files = glob.glob(f"{folder}*.dat")
 
     suffix = "_trace.dat"
@@ -26,14 +28,14 @@ def load_folder(folder, t_start_offset=0.2):
 
     measurements = []
     for stub in stubs:
-        trace, retrace = read_data_files(stub, t_start_offset=t_start_offset)
+        trace, retrace = read_data_files(stub, plot=plot)
         measurements.append(trace)
         measurements.append(retrace)
 
     return measurements
 
 
-def read_data_files(stub, t_start_offset):
+def read_data_files(stub, plot=True):
     filename = stub.split("/")[-1]
     timestamp, description = filename.split("_", 1)
 
@@ -58,10 +60,10 @@ def read_data_files(stub, t_start_offset):
     rate = scan_speed * scan_resolution / abs(scan_range_stop - scan_range_start)
     break_duration = int(round(rate * break_duration)) / rate
 
-    i_measurement_start = find_measurement_start(
-        t_wavemeter, f_wavemeter, t_start_offset
+    # fit start of first scan using data up to one scan_duration
+    t_measurement_start = find_measurement_start(
+        t_wavemeter, f_wavemeter, t_window=scan_duration
     )
-    t_measurement_start = t_wavemeter[i_measurement_start]
     t_measurement_start_retrace = t_measurement_start + scan_duration + break_duration
 
     t_rates_trace, f_rates_trace = interp_wavemeter_readings(
@@ -82,6 +84,32 @@ def read_data_files(stub, t_start_offset):
         scan_repetitions,
         break_duration,
     )
+
+    if plot:
+        fig, axs = plt.subplots(1, 2, figsize=(10, 2), sharey=True)
+        for ax in axs:
+            ax.plot(t_wavemeter, 1e-12 * f_wavemeter, ".", label="data")
+
+        axs[0].plot(t_rates_trace[0], 1e-12 * f_rates_trace[0], label="trace")
+        axs[0].plot(t_rates_retrace[0], 1e-12 * f_rates_retrace[0], label="retrace")
+        axs[1].plot(t_rates_trace[-1], 1e-12 * f_rates_trace[-1], label="trace")
+        axs[1].plot(t_rates_retrace[-1], 1e-12 * f_rates_retrace[-1], label="retrace")
+
+        axs[0].set_xlim(0, t_measurement_start + 2 * (scan_duration + break_duration))
+        last_stop = t_measurement_start + 2 * scan_repetitions * (
+                    scan_duration + break_duration)
+        last_start = last_stop - break_duration - 2 * (scan_duration + break_duration)
+        axs[1].set_xlim(last_start, last_stop)
+
+        for ax in axs:
+            ax.set_xlabel("Time (s)")
+        axs[0].legend(title="start")
+        axs[1].legend(title="end")
+        axs[0].yaxis.set_major_formatter(ticker.ScalarFormatter(useOffset=False))
+        axs[0].set_ylabel("Wavemeter (THz)")
+        fig.suptitle(f"{timestamp} | {description}")
+        plt.subplots_adjust(wspace=0.05)
+        plt.show()
 
     f_unified_trace = f_rates_trace[0]
     count_rate_trace = interp_count_rate(
@@ -140,11 +168,35 @@ def read_header(file_path):
     return timestamp, metadata
 
 
-def find_measurement_start(t, f, t_window):
-    i = np.argmin(np.abs(t - t_window))
-    # compute second order derivative
-    o2_d = np.diff(np.diff(f[:i]))
-    return np.argmax(np.abs(o2_d)) + 1
+def find_measurement_start(t: np.ndarray, f: np.ndarray, t_window: float) -> float:
+    """Find the change point from constant to linear in the wavemeter data.
+
+    :param t: array containing the timestamps
+    :param f: array containing the frequencies
+    :param t_window: time until when to consider data for the fit
+    :return: fitted change time
+    """
+    # only consider data up to t_window and normalize frequencies
+    i_offset = np.argmin(np.abs(t - t_window))
+    t_sel = t[:i_offset].copy()
+    f_sel = f[:i_offset].copy()
+    f_sel -= f_sel[0]
+    f_sel /= f_sel[-1]
+
+    def constant_to_linear_change(x, c, x_change, slope):
+        return np.where(x <= x_change, c, c + slope * (x - x_change))
+    model = lmfit.Model(constant_to_linear_change)
+
+    # guess change point: max. of second order derivative
+    o2_d = np.diff(np.diff(f_sel))
+    i_change_guess = np.argmax(np.abs(o2_d)) + 1
+    x_change_guess = t_sel[i_change_guess]
+
+    slope_guess = (f_sel[-1] - f_sel[0]) / (t_sel[-1] - x_change_guess)
+    c_guess = f_sel[0]
+
+    res = model.fit(f_sel, x=t_sel, c=c_guess, x_change=x_change_guess, slope=slope_guess)
+    return res.params["x_change"].value
 
 
 def interp_wavemeter_readings(
