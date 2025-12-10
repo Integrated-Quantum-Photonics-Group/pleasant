@@ -216,7 +216,9 @@ def interp_wavemeter_readings(
     offset = np.tile(scan_period * np.arange(scan_repetitions), (bin_count, 1))
     t_rates = np.tile(t_rates_first_scan, (scan_repetitions, 1)) + offset.T
 
-    f_rates = np.interp(t_rates, t_wavemeter, f_wavemeter, right=np.nan)
+    # if times are beyond the wavemeter data: nan
+    # can occur e.g. if wavemeter stream stopped too soon
+    f_rates = np.interp(t_rates, t_wavemeter, f_wavemeter, left=np.nan, right=np.nan)
     return t_rates, f_rates
 
 
@@ -239,5 +241,11 @@ def interp_count_rate(f_unified, f_rates, count_rate):
             left=0.0,
             right=0.0,
         )
+
+    nans = np.isnan(count_rate_interpolated)
+    if nans.sum() > 0:
+        print("Replacing NaNs in the count rate matrix with zeros. "
+              "Did the wavemeter stream stop too early?")
+        count_rate_interpolated[nans] = 0.0
 
     return count_rate_interpolated
