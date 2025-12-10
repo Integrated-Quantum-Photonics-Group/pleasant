@@ -242,25 +242,25 @@ class Measurement:
     ) -> matplotlib.figure.Figure:
         """Plot the count rates as a 2D image.
 
-        Sum up the counts of all scans and fit them with a Gaussian function.
+        Fit mean count rate over all scans with a Gaussian function.
 
         :param x_lim: limits for the x-axis
-        :param scan_index_range: scans to sum up and display
+        :param scan_index_range: scans to limit mean and display to
         :raises AssertionError: if measurement contains less than two scans
         :return: matplotlib figure object
         """
         if self.scan_count < 2:
             raise AssertionError("Measurement must contain at least two scans.")
 
-        sum_fit_result = self.fit_sum_of_scans(scan_index_range=scan_index_range)
+        fit_result = self.fit_sum_of_scans(scan_index_range=scan_index_range)
 
         fig, (ax, ax2) = plt.subplots(2, sharex=True, constrained_layout=True)
 
-        # top plot: inhomogeneous line width (sum of scans)
-        ax.plot(1e-9 * self.exc_freq, sum_fit_result.data, label="Data")
-        ax.plot(1e-9 * self.exc_freq, sum_fit_result.best_fit, label="Gaussian Fit")
+        # top plot: inhomogeneous line width
+        ax.plot(1e-9 * self.exc_freq, fit_result.data, label="Data")
+        ax.plot(1e-9 * self.exc_freq, fit_result.best_fit, label="Gaussian Fit")
 
-        fwhm_ghz = 1e-9 * sum_fit_result.params["fwhm"].value
+        fwhm_ghz = fit_result.params["fwhm"].value
         if fwhm_ghz < 1.0:
             label = "$w$ = {:.0f} MHz".format(1e3 * fwhm_ghz)
         else:
@@ -268,7 +268,7 @@ class Measurement:
         ax.plot([], [], "w", label=label)
 
         ax.ticklabel_format(scilimits=(-5, 3))
-        ax.set_ylabel("Counts per Bin")
+        ax.set_ylabel("Mean Count Rate (kHz)")
 
         # bottom plot: evolution of spectral position
         if scan_index_range is None:
@@ -307,38 +307,38 @@ class Measurement:
     def fit_sum_of_scans(
         self, scan_index_range: tuple[int, int] | None = None
     ) -> lmfit.model.ModelResult:
-        """Sum up the counts of all scans and fit the result with a Gaussian function.
+        """Fit mean count rate over all scans with a Gaussian function.
 
-        A custom range may be specified.
+        The frequency is converted to GHz and offset by the minimum frequency.
+        A custom scan index range may be specified.
 
-        :param scan_index_range: scans to sum up
-        :raises AssertionError: if scan_duration is NaN
-        :return: fit result
+        :param scan_index_range: scans to limit mean to
+        :return: fit result with count rate in kHz
         """
-        if np.isnan(self.scan_speed):
-            raise AssertionError('Attribute "scan_duration" must not be NaN.')
-
-        time_per_bin = self.bin_width / self.scan_speed
-        counts = self.count_rate * time_per_bin
         if scan_index_range is None:
-            sum_of_scans = counts.sum(axis=0)
+            mean_rate = self.count_rate.mean(axis=0)
         else:
-            sum_of_scans = counts[scan_index_range[0] : scan_index_range[1], :].sum(
+            mean_rate = self.count_rate[scan_index_range[0]: scan_index_range[1], :].mean(
                 axis=0
             )
+        mean_rate *= 1e-3
+
+        f_ghz = 1e-9 * self.exc_freq
+        f_offset = f_ghz.min()
+        f_ghz -= f_offset
 
         model = fitting.gaussian
         params = model.make_params()
-        sigma_guess = fitting.gauss_sigma(self.freq_range / 2)
-        sigma_max = fitting.gauss_sigma(self.freq_range)
-        amp_guess = fitting.gauss_amplitude(sum_of_scans.max(), sigma_guess)
-        center_guess = self.exc_freq[sum_of_scans.argmax()]
+        sigma_guess = fitting.gauss_sigma(f_ghz.max() / 2)
+        sigma_max = fitting.gauss_sigma(f_ghz.max())
+        amp_guess = fitting.gauss_amplitude(mean_rate.max(), sigma_guess)
+        center_guess = f_ghz[mean_rate.argmax()]
 
         params["amplitude"].set(value=amp_guess, min=0)
         params["sigma"].set(value=sigma_guess, max=sigma_max)
         params["center"].set(value=center_guess)
 
-        return model.fit(sum_of_scans, x=self.exc_freq, params=params)
+        return model.fit(mean_rate, x=f_ghz, params=params)
 
     def photon_count_filter(self, threshold: int) -> np.ndarray:
         """Create a mask depending on a very simple photon count filtering condition.
