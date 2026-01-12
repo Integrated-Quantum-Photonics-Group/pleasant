@@ -20,7 +20,7 @@ from pleasant.measurement import Measurement
 __all__ = ["load_folder"]
 
 
-def load_folder(folder, plot=True):
+def load_folder(folder, plot=True, interp_eval_scan_index=0):
     data_files = glob.glob(f"{folder}*.dat")
 
     suffix = "_trace.dat"
@@ -28,14 +28,15 @@ def load_folder(folder, plot=True):
 
     measurements = []
     for stub in stubs:
-        trace, retrace = read_data_files(stub, plot=plot)
+        trace, retrace = read_data_files(stub, plot=plot,
+                                         interp_eval_scan_index=interp_eval_scan_index)
         measurements.append(trace)
         measurements.append(retrace)
 
     return measurements
 
 
-def read_data_files(stub, plot=True):
+def read_data_files(stub, plot=True, interp_eval_scan_index=0):
     filename = stub.split("/")[-1]
     timestamp, description = filename.split("_", 1)
 
@@ -111,12 +112,12 @@ def read_data_files(stub, plot=True):
         plt.subplots_adjust(wspace=0.05)
         plt.show()
 
-    f_unified_trace = f_rates_trace[0]
+    f_unified_trace = f_rates_trace[interp_eval_scan_index]
     count_rate_trace = interp_count_rate(
         f_unified_trace, f_rates_trace, count_rate_trace
     )
 
-    f_unified_retrace = f_rates_retrace[0]
+    f_unified_retrace = f_rates_retrace[interp_eval_scan_index]
     count_rate_retrace = interp_count_rate(
         f_unified_retrace, f_rates_retrace, count_rate_retrace
     )
