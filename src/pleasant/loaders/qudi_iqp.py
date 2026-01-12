@@ -63,7 +63,7 @@ def read_data_files(stub, plot=True, interp_eval_scan_index=0):
 
     # fit start of first scan using data up to one scan_duration
     t_measurement_start = find_measurement_start(
-        t_wavemeter, f_wavemeter, t_window=scan_duration
+        t_wavemeter, f_wavemeter, t_window=scan_duration+break_duration
     )
     t_measurement_start_retrace = t_measurement_start + scan_duration + break_duration
 
