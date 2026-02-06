@@ -61,9 +61,12 @@ def read_data_files(stub, plot=True, interp_eval_scan_index=0):
     rate = scan_speed * scan_resolution / abs(scan_range_stop - scan_range_start)
     break_duration = int(round(rate * break_duration)) / rate
 
-    # fit start of first scan using data up to one scan_duration
+    # fit start of first scan in an iterative way
+    # start should be within approximately one trace and retrace
+    t_sel = t_wavemeter[:t_wavemeter.size // scan_repetitions]
+    f_sel = f_wavemeter[:t_wavemeter.size // scan_repetitions]
     t_measurement_start = find_measurement_start(
-        t_wavemeter, f_wavemeter, t_window=scan_duration+break_duration
+        t_sel, f_sel,
     )
     t_measurement_start_retrace = t_measurement_start + scan_duration + break_duration
 
@@ -169,35 +172,50 @@ def read_header(file_path):
     return timestamp, metadata
 
 
-def find_measurement_start(t: np.ndarray, f: np.ndarray, t_window: float) -> float:
+def find_measurement_start(t: np.ndarray, f: np.ndarray, window: int = 5, threshold: float = 0.2) -> float:
     """Find the change point from constant to linear in the wavemeter data.
 
     :param t: array containing the timestamps
     :param f: array containing the frequencies
-    :param t_window: time until when to consider data for the fit
+    :param window: number of samples where iterative fits should agree
+    :param threshold: how well fits have to agree within in sampling intervals
+    :raises ValueError: if change point could not be found
     :return: fitted change time
     """
-    # only consider data up to t_window and normalize frequencies
-    i_offset = np.argmin(np.abs(t - t_window))
-    t_sel = t[:i_offset].copy()
-    f_sel = f[:i_offset].copy()
-    f_sel -= f_sel[0]
-    f_sel /= f_sel[-1]
+    t_all = t.copy()
+    # normalize frequencies
+    f_all = f - f[0]
+    f_all = np.abs(f_all)
+    f_all /= f_all.max()
 
+    # broken stick model
     def constant_to_linear_change(x, c, x_change, slope):
         return np.where(x <= x_change, c, c + slope * (x - x_change))
     model = lmfit.Model(constant_to_linear_change)
 
-    # guess change point: max. of second order derivative
-    o2_d = np.diff(np.diff(f_sel))
-    i_change_guess = np.argmax(np.abs(o2_d)) + 1
-    x_change_guess = t_sel[i_change_guess]
+    # perform iterative fits: include one more sample each iteration
+    recent_fit_results = np.full(window, np.nan)
+    i = window
+    while i < t_all.size - 1:
+        t = t_all[:i]
+        f = f_all[:i]
 
-    slope_guess = (f_sel[-1] - f_sel[0]) / (t_sel[-1] - x_change_guess)
-    c_guess = f_sel[0]
+        x_change_guess = t.mean()
+        slope_guess = (f[-1] - f[0]) / (t[-1] - x_change_guess)
+        c_guess = f[0]
 
-    res = model.fit(f_sel, x=t_sel, c=c_guess, x_change=x_change_guess, slope=slope_guess)
-    return res.params["x_change"].value
+        res = model.fit(f, x=t, c=c_guess, x_change=x_change_guess,
+                        slope=slope_guess)
+        recent_fit_results[0] = res.params["x_change"].value
+        recent_fit_results = np.roll(recent_fit_results, 1)
+
+        # check if fit results agree to less than one sample precision
+        spacing = np.diff(t).mean()
+        if recent_fit_results.std() / spacing < threshold:
+            return recent_fit_results.mean()
+
+        i += 1
+    raise ValueError("Could not find a change point.")
 
 
 def interp_wavemeter_readings(
